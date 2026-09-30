@@ -1,0 +1,17 @@
+{
+  "short_name": "VisionInspect",
+  "name": "VisionInspect AI - Industrial Inspection",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "theme_color": "#06b6d4",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "AI-Powered Industrial Vision Inspection & Quality Management System"
+}

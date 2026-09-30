@@ -1,0 +1,466 @@
+@import "tailwindcss";
+
+/* -------------------------------------------------------------
+   SYSTEM THEME ENGINE: DYNAMIC FULL-APP CANVAS & CONTRAST
+   ------------------------------------------------------------- */
+
+html, body, #root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* HIGH CONTRAST READABLE BUTTON TEXT RULE ACROSS ALL THEMES */
+button.bg-gradient-to-r,
+.bg-gradient-to-r,
+.bg-cyan-500,
+.bg-emerald-500,
+.bg-rose-500 {
+  color: #ffffff !important;
+}
+
+button.bg-gradient-to-r span,
+.bg-gradient-to-r span,
+.bg-cyan-500 span {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* TRANSITIONS FOR SMOOTH THEME SWITCHING */
+.app-theme-root,
+.app-theme-root *,
+.app-theme-root .bg-slate-900,
+.app-theme-root .bg-slate-950,
+.app-theme-root .bg-slate-900\/90 {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* =============================================================
+   1. CYBER BLUE (DEFAULT THEME)
+   ============================================================= */
+.theme-cyber-blue {
+  background: radial-gradient(circle at 50% 0%, #0c1938 0%, #030712 70%);
+  background-attachment: fixed;
+}
+
+/* =============================================================
+   2. MATRIX GREEN THEME
+   ============================================================= */
+.theme-matrix-green {
+  background: radial-gradient(circle at 50% 0%, #052e16 0%, #011207 70%);
+  background-attachment: fixed;
+}
+
+/* Backgrounds & Cards in Matrix Green */
+.theme-matrix-green .bg-slate-950 {
+  background-color: #021a0d !important;
+}
+.theme-matrix-green .bg-slate-900,
+.theme-matrix-green .bg-slate-900\/90,
+.theme-matrix-green .bg-slate-900\/80,
+.theme-matrix-green .bg-slate-900\/50 {
+  background-color: rgba(4, 38, 20, 0.9) !important;
+}
+.theme-matrix-green .border-slate-800,
+.theme-matrix-green .border-slate-700 {
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+/* Typography & Text Contrast in Matrix Green */
+.theme-matrix-green .text-cyan-400,
+.theme-matrix-green .text-cyan-300,
+.theme-matrix-green .text-cyan-200 {
+  color: #00ff66 !important;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+}
+.theme-matrix-green .text-cyan-500 {
+  color: #10b981 !important;
+}
+
+/* Accents & Buttons */
+.theme-matrix-green .border-cyan-500,
+.theme-matrix-green .border-cyan-500\/10,
+.theme-matrix-green .border-cyan-500\/20,
+.theme-matrix-green .border-cyan-500\/30,
+.theme-matrix-green .border-cyan-500\/40,
+.theme-matrix-green .border-cyan-500\/50,
+.theme-matrix-green .border-cyan-400 {
+  border-color: rgba(52, 211, 153, 0.5) !important;
+}
+.theme-matrix-green .bg-cyan-500 {
+  background-color: #10b981 !important;
+  color: #011207 !important;
+}
+.theme-matrix-green .bg-cyan-500\/10,
+.theme-matrix-green .bg-cyan-500\/20,
+.theme-matrix-green .bg-cyan-500\/30,
+.theme-matrix-green .bg-cyan-950,
+.theme-matrix-green .bg-cyan-950\/30,
+.theme-matrix-green .bg-cyan-950\/50,
+.theme-matrix-green .bg-cyan-950\/70 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+}
+.theme-matrix-green .from-cyan-500 {
+  --tw-gradient-from: #10b981 var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(16, 185, 129, 0)) 100%) !important;
+}
+.theme-matrix-green .to-blue-600,
+.theme-matrix-green .to-blue-500 {
+  --tw-gradient-to: #047857 var(--tw-gradient-to-position) !important;
+}
+.theme-matrix-green .ring-cyan-500,
+.theme-matrix-green .ring-cyan-400 {
+  --tw-ring-color: #34d399 !important;
+}
+
+/* =============================================================
+   3. DEEP PURPLE / CYBERPUNK THEME
+   ============================================================= */
+.theme-deep-purple {
+  background: radial-gradient(circle at 50% 0%, #2e1065 0%, #0d041a 70%);
+  background-attachment: fixed;
+}
+
+/* Backgrounds & Cards in Deep Purple */
+.theme-deep-purple .bg-slate-950 {
+  background-color: #120624 !important;
+}
+.theme-deep-purple .bg-slate-900,
+.theme-deep-purple .bg-slate-900\/90,
+.theme-deep-purple .bg-slate-900\/80,
+.theme-deep-purple .bg-slate-900\/50 {
+  background-color: rgba(38, 14, 74, 0.9) !important;
+}
+.theme-deep-purple .border-slate-800,
+.theme-deep-purple .border-slate-700 {
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+/* Typography & Text Contrast in Deep Purple */
+.theme-deep-purple .text-cyan-400,
+.theme-deep-purple .text-cyan-300,
+.theme-deep-purple .text-cyan-200 {
+  color: #e879f9 !important;
+  text-shadow: 0 0 10px rgba(232, 121, 249, 0.2);
+}
+.theme-deep-purple .text-cyan-500 {
+  color: #c084fc !important;
+}
+
+/* Accents & Buttons */
+.theme-deep-purple .border-cyan-500,
+.theme-deep-purple .border-cyan-500\/10,
+.theme-deep-purple .border-cyan-500\/20,
+.theme-deep-purple .border-cyan-500\/30,
+.theme-deep-purple .border-cyan-500\/40,
+.theme-deep-purple .border-cyan-500\/50,
+.theme-deep-purple .border-cyan-400 {
+  border-color: rgba(192, 132, 252, 0.5) !important;
+}
+.theme-deep-purple .bg-cyan-500 {
+  background-color: #c084fc !important;
+  color: #0d041a !important;
+}
+.theme-deep-purple .bg-cyan-500\/10,
+.theme-deep-purple .bg-cyan-500\/20,
+.theme-deep-purple .bg-cyan-500\/30,
+.theme-deep-purple .bg-cyan-950,
+.theme-deep-purple .bg-cyan-950\/30,
+.theme-deep-purple .bg-cyan-950\/50,
+.theme-deep-purple .bg-cyan-950\/70 {
+  background-color: rgba(168, 85, 247, 0.2) !important;
+}
+.theme-deep-purple .from-cyan-500 {
+  --tw-gradient-from: #c084fc var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(192, 132, 252, 0)) 100%) !important;
+}
+.theme-deep-purple .to-blue-600,
+.theme-deep-purple .to-blue-500 {
+  --tw-gradient-to: #7c3aed var(--tw-gradient-to-position) !important;
+}
+.theme-deep-purple .ring-cyan-500,
+.theme-deep-purple .ring-cyan-400 {
+  --tw-ring-color: #c084fc !important;
+}
+
+/* =============================================================
+   4. METALLIC SILVER / TITANIUM THEME
+   ============================================================= */
+.theme-metallic {
+  background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 70%);
+  background-attachment: fixed;
+}
+
+/* Backgrounds & Cards in Metallic Silver */
+.theme-metallic .bg-slate-950 {
+  background-color: #0d111a !important;
+}
+.theme-metallic .bg-slate-900,
+.theme-metallic .bg-slate-900\/90,
+.theme-metallic .bg-slate-900\/80,
+.theme-metallic .bg-slate-900\/50 {
+  background-color: rgba(30, 41, 59, 0.85) !important;
+}
+.theme-metallic .border-slate-800,
+.theme-metallic .border-slate-700 {
+  border-color: rgba(203, 213, 225, 0.25) !important;
+}
+
+/* Typography & Text Contrast in Metallic Silver */
+.theme-metallic .text-cyan-400,
+.theme-metallic .text-cyan-300,
+.theme-metallic .text-cyan-200 {
+  color: #ffffff !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+.theme-metallic .text-cyan-500 {
+  color: #cbd5e1 !important;
+}
+
+/* Accents & Buttons */
+.theme-metallic .border-cyan-500,
+.theme-metallic .border-cyan-500\/10,
+.theme-metallic .border-cyan-500\/20,
+.theme-metallic .border-cyan-500\/30,
+.theme-metallic .border-cyan-500\/40,
+.theme-metallic .border-cyan-500\/50,
+.theme-metallic .border-cyan-400 {
+  border-color: rgba(226, 232, 240, 0.5) !important;
+}
+.theme-metallic .bg-cyan-500 {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.theme-metallic .bg-cyan-500\/10,
+.theme-metallic .bg-cyan-500\/20,
+.theme-metallic .bg-cyan-500\/30,
+.theme-metallic .bg-cyan-950,
+.theme-metallic .bg-cyan-950\/30,
+.theme-metallic .bg-cyan-950\/50,
+.theme-metallic .bg-cyan-950\/70 {
+  background-color: rgba(203, 213, 225, 0.2) !important;
+}
+.theme-metallic .from-cyan-500 {
+  --tw-gradient-from: #f8fafc var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(248, 250, 252, 0)) 100%) !important;
+}
+.theme-metallic .to-blue-600,
+.theme-metallic .to-blue-500 {
+  --tw-gradient-to: #475569 var(--tw-gradient-to-position) !important;
+}
+.theme-metallic .ring-cyan-500,
+.theme-metallic .ring-cyan-400 {
+  --tw-ring-color: #f8fafc !important;
+}
+
+/* =============================================================
+   5. SOLAR GOLD / INDUSTRIAL AMBER THEME
+   ============================================================= */
+.theme-solar-gold {
+  background: radial-gradient(circle at 50% 0%, #451a03 0%, #120701 70%);
+  background-attachment: fixed;
+}
+
+/* Backgrounds & Cards in Solar Gold */
+.theme-solar-gold .bg-slate-950 {
+  background-color: #1a0b02 !important;
+}
+.theme-solar-gold .bg-slate-900,
+.theme-solar-gold .bg-slate-900\/90,
+.theme-solar-gold .bg-slate-900\/80,
+.theme-solar-gold .bg-slate-900\/50 {
+  background-color: rgba(58, 23, 3, 0.9) !important;
+}
+.theme-solar-gold .border-slate-800,
+.theme-solar-gold .border-slate-700 {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Typography & Text Contrast in Solar Gold */
+.theme-solar-gold .text-cyan-400,
+.theme-solar-gold .text-cyan-300,
+.theme-solar-gold .text-cyan-200 {
+  color: #ffcc00 !important;
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.25);
+}
+.theme-solar-gold .text-cyan-500 {
+  color: #f59e0b !important;
+}
+
+/* Accents & Buttons */
+.theme-solar-gold .border-cyan-500,
+.theme-solar-gold .border-cyan-500\/10,
+.theme-solar-gold .border-cyan-500\/20,
+.theme-solar-gold .border-cyan-500\/30,
+.theme-solar-gold .border-cyan-500\/40,
+.theme-solar-gold .border-cyan-500\/50,
+.theme-solar-gold .border-cyan-400 {
+  border-color: rgba(251, 191, 36, 0.5) !important;
+}
+.theme-solar-gold .bg-cyan-500 {
+  background-color: #fbbf24 !important;
+  color: #120701 !important;
+}
+.theme-solar-gold .bg-cyan-500\/10,
+.theme-solar-gold .bg-cyan-500\/20,
+.theme-solar-gold .bg-cyan-500\/30,
+.theme-solar-gold .bg-cyan-950,
+.theme-solar-gold .bg-cyan-950\/30,
+.theme-solar-gold .bg-cyan-950\/50,
+.theme-solar-gold .bg-cyan-950\/70 {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+}
+.theme-solar-gold .from-cyan-500 {
+  --tw-gradient-from: #fbbf24 var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(251, 191, 36, 0)) 100%) !important;
+}
+.theme-solar-gold .to-blue-600,
+.theme-solar-gold .to-blue-500 {
+  --tw-gradient-to: #b45309 var(--tw-gradient-to-position) !important;
+}
+.theme-solar-gold .ring-cyan-500,
+.theme-solar-gold .ring-cyan-400 {
+  --tw-ring-color: #fbbf24 !important;
+}
+
+/* =============================================================
+   6. SHINY PINK THEME (GLOSSY & METALLIC NEON PINK)
+   ============================================================= */
+.theme-shiny-pink {
+  background: radial-gradient(circle at 50% 0%, #be185d 0%, #290215 70%);
+  background-attachment: fixed;
+}
+
+.theme-shiny-pink .bg-slate-950 {
+  background-color: #2b0417 !important;
+}
+.theme-shiny-pink .bg-slate-900,
+.theme-shiny-pink .bg-slate-900\/90,
+.theme-shiny-pink .bg-slate-900\/80,
+.theme-shiny-pink .bg-slate-900\/50 {
+  background-color: rgba(80, 7, 46, 0.9) !important;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.25);
+}
+.theme-shiny-pink .border-slate-800,
+.theme-shiny-pink .border-slate-700 {
+  border-color: rgba(251, 113, 133, 0.5) !important;
+}
+
+.theme-shiny-pink .text-cyan-400,
+.theme-shiny-pink .text-cyan-300,
+.theme-shiny-pink .text-cyan-200 {
+  color: #ff66c4 !important;
+  text-shadow: 0 0 12px rgba(255, 102, 196, 0.6);
+}
+.theme-shiny-pink .text-cyan-500 {
+  color: #f43f5e !important;
+}
+
+.theme-shiny-pink .border-cyan-500,
+.theme-shiny-pink .border-cyan-500\/10,
+.theme-shiny-pink .border-cyan-500\/20,
+.theme-shiny-pink .border-cyan-500\/30,
+.theme-shiny-pink .border-cyan-500\/40,
+.theme-shiny-pink .border-cyan-500\/50,
+.theme-shiny-pink .border-cyan-400 {
+  border-color: rgba(255, 102, 196, 0.6) !important;
+}
+.theme-shiny-pink .bg-cyan-500 {
+  background-color: #ff2a85 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(255, 42, 133, 0.6);
+}
+.theme-shiny-pink .bg-cyan-500\/10,
+.theme-shiny-pink .bg-cyan-500\/20,
+.theme-shiny-pink .bg-cyan-500\/30,
+.theme-shiny-pink .bg-cyan-950,
+.theme-shiny-pink .bg-cyan-950\/30,
+.theme-shiny-pink .bg-cyan-950\/50,
+.theme-shiny-pink .bg-cyan-950\/70 {
+  background-color: rgba(255, 42, 133, 0.25) !important;
+}
+.theme-shiny-pink .from-cyan-500 {
+  --tw-gradient-from: #ff2a85 var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(255, 42, 133, 0)) 100%) !important;
+}
+.theme-shiny-pink .to-blue-600,
+.theme-shiny-pink .to-blue-500 {
+  --tw-gradient-to: #be185d var(--tw-gradient-to-position) !important;
+}
+.theme-shiny-pink .ring-cyan-500,
+.theme-shiny-pink .ring-cyan-400 {
+  --tw-ring-color: #ff66c4 !important;
+}
+
+/* =============================================================
+   7. NEON RED / CHILI RED THEME (FIERY CHILI & GLOWING SCARLET)
+   ============================================================= */
+.theme-neon-red {
+  background: radial-gradient(circle at 50% 0%, #85060f 0%, #170204 70%);
+  background-attachment: fixed;
+}
+
+.theme-neon-red .bg-slate-950 {
+  background-color: #170204 !important;
+}
+.theme-neon-red .bg-slate-900,
+.theme-neon-red .bg-slate-900\/90,
+.theme-neon-red .bg-slate-900\/80,
+.theme-neon-red .bg-slate-900\/50 {
+  background-color: rgba(43, 4, 8, 0.92) !important;
+  box-shadow: 0 0 20px rgba(255, 30, 66, 0.2);
+}
+.theme-neon-red .border-slate-800,
+.theme-neon-red .border-slate-700 {
+  border-color: rgba(255, 60, 90, 0.4) !important;
+}
+
+.theme-neon-red .text-cyan-400,
+.theme-neon-red .text-cyan-300,
+.theme-neon-red .text-cyan-200 {
+  color: #ff3b56 !important;
+  text-shadow: 0 0 12px rgba(255, 59, 86, 0.5);
+}
+.theme-neon-red .text-cyan-500 {
+  color: #ff2a46 !important;
+}
+
+.theme-neon-red .border-cyan-500,
+.theme-neon-red .border-cyan-500\/10,
+.theme-neon-red .border-cyan-500\/20,
+.theme-neon-red .border-cyan-500\/30,
+.theme-neon-red .border-cyan-500\/40,
+.theme-neon-red .border-cyan-500\/50,
+.theme-neon-red .border-cyan-400 {
+  border-color: rgba(255, 50, 75, 0.55) !important;
+}
+.theme-neon-red .bg-cyan-500 {
+  background-color: #ff1e42 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 15px rgba(255, 30, 66, 0.6);
+}
+.theme-neon-red .bg-cyan-500\/10,
+.theme-neon-red .bg-cyan-500\/20,
+.theme-neon-red .bg-cyan-500\/30,
+.theme-neon-red .bg-cyan-950,
+.theme-neon-red .bg-cyan-950\/30,
+.theme-neon-red .bg-cyan-950\/50,
+.theme-neon-red .bg-cyan-950\/70 {
+  background-color: rgba(255, 30, 66, 0.22) !important;
+}
+.theme-neon-red .from-cyan-500 {
+  --tw-gradient-from: #ff1e42 var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-from) 0%, var(--tw-gradient-to, rgba(255, 30, 66, 0)) 100%) !important;
+}
+.theme-neon-red .to-blue-600,
+.theme-neon-red .to-blue-500 {
+  --tw-gradient-to: #880812 var(--tw-gradient-to-position) !important;
+}
+.theme-neon-red .ring-cyan-500,
+.theme-neon-red .ring-cyan-400 {
+  --tw-ring-color: #ff3b56 !important;
+}
+

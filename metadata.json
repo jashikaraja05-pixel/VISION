@@ -1,0 +1,8 @@
+{
+  "name": "VisionInspect AI",
+  "description": "AI-Powered Smart Visual Inspection and Quality Management System for manufacturing industries.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

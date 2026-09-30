@@ -1,0 +1,32 @@
+{
+  "users": [],
+  "inspections": [],
+  "alerts": [],
+  "messages": [],
+  "settings": {
+    "companyName": "",
+    "factoryLocation": "Main Plant Alpha",
+    "contactEmail": "support@visioninspect.ai",
+    "aiConfidenceThreshold": 85,
+    "aiModelVersion": "Gemini 2.5 Flash Industrial",
+    "strictness": "Standard",
+    "productCategories": [
+      "Precision Gear",
+      "SMT Circuit Board",
+      "Turbine Blade",
+      "Hydraulic Cylinder",
+      "Automotive Parts"
+    ],
+    "defectCategories": [
+      "Crack",
+      "Scratch",
+      "Dent",
+      "Rust",
+      "Missing Part",
+      "Surface Damage"
+    ],
+    "emailAlerts": true,
+    "smsAlerts": false,
+    "criticalAlertTrigger": true
+  }
+}
