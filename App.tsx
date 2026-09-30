@@ -19,6 +19,7 @@ import { AnalyticalTrendsPage } from './components/AnalyticalTrendsPage';
 import { CameraSensorSetupPage } from './components/CameraSensorSetupPage';
 import { AdminAppLockModal, AppLockConfig } from './components/AdminAppLockModal';
 import { DirectMessagingPage } from './components/DirectMessagingPage';
+import { TestingEvaluationPage } from './components/TestingEvaluationPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 import { 
@@ -646,6 +647,13 @@ export default function App() {
               setActiveTab={setActiveTab}
               currentUser={currentUser}
               onDeleteInspection={handleDeleteInspection}
+            />
+          )}
+
+          {activeTab === 'evaluation' && (
+            <TestingEvaluationPage
+              currentUser={currentUser}
+              setActiveTab={setActiveTab}
             />
           )}
 

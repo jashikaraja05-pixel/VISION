@@ -58,6 +58,35 @@ export interface DefectItem {
 export type QualityDecision = 'Excellent' | 'Acceptable' | 'Rework Required' | 'Reject';
 export type PassFailStatus = 'PASS' | 'FAIL';
 
+export interface ImageQualityMetrics {
+  status: 'PASSED' | 'WARNING' | 'FAILED';
+  width: number;
+  height: number;
+  brightness: number; // 0-255 (mean pixel intensity)
+  brightnessStatus: 'Optimal' | 'Underexposed' | 'Overexposed';
+  blurScore: number; // Laplacian variance (sharpness threshold: 55)
+  clarityStatus: 'Sharp' | 'Marginal' | 'Blurry';
+  contrastScore: number; // Standard deviation of luminance
+  contrastStatus: 'Optimal' | 'Low Contrast' | 'High Dynamic';
+  rejectionReason?: string;
+  recommendation?: string;
+  preprocessedImageUrl?: string;
+  edgeMapImageUrl?: string;
+  opencvProcessingTimeMs: number;
+}
+
+export interface ValidationInfo {
+  imageQualityStatus: 'PASSED' | 'WARNING' | 'FAILED';
+  dimensions: string;
+  preprocessingStatus: string;
+  aiProcessingStatus: string;
+  inspectionStatus: string;
+  opencvTimeMs: number;
+  aiInferenceTimeMs: number;
+  totalPipelineTimeMs: number;
+  aiConfidence?: number;
+}
+
 export interface InspectionRecord {
   id: string;
   componentName: string;
@@ -83,6 +112,16 @@ export interface InspectionRecord {
   defectType?: DefectType;
   workingCondition?: string;
   notes?: string;
+
+  // Features 1, 2, 3: OpenCV & Structured AI Results
+  imageQuality?: ImageQualityMetrics;
+  detectedDefectName?: string;
+  defectCategory?: string;
+  severityLevel?: 'Low' | 'Medium' | 'High' | 'Critical' | 'Major' | 'Minor';
+  visualEvidence?: string;
+  explanationText?: string;
+  recommendedAction?: string;
+  validationInfo?: ValidationInfo;
 }
 
 export interface AlertNotification {
@@ -147,7 +186,8 @@ export type ActiveTab =
   | 'camera-setup'
   | 'settings'
   | 'admin-dashboard'
-  | 'messages';
+  | 'messages'
+  | 'evaluation';
 
 export interface DirectMessage {
   id: string;
@@ -182,5 +222,26 @@ export interface LoginLog {
   loginTimestamp: string;
   device?: string;
   ipAddress?: string;
+}
+
+export interface TestCaseRecord {
+  id: string;
+  testCaseId: string;
+  title: string;
+  inputType: string;
+  sampleImageUrl?: string;
+  imageQualityStatus: 'PASSED' | 'WARNING' | 'FAILED';
+  blurScore: number;
+  brightness: number;
+  aiResult: 'PASS' | 'FAIL';
+  expectedResult: 'PASS' | 'FAIL';
+  observedResult: string;
+  defectName?: string;
+  defectCategory?: string;
+  severity?: 'Low' | 'Medium' | 'High' | 'Critical';
+  processingTimeMs: number;
+  verdict: 'PASS' | 'FAIL';
+  notes: string;
+  timestamp: string;
 }
 

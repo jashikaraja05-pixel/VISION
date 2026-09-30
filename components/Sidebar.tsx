@@ -12,6 +12,7 @@ import {
   TrendingUp,
   ChevronRight,
   MessageSquare,
+  FlaskConical,
   X
 } from 'lucide-react';
 import { ActiveTab, UserRole } from '../types';
@@ -41,6 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'messages' as ActiveTab, label: 'Direct Message', icon: MessageSquare, roles: ['Admin', 'Inspector'] },
     { id: 'history' as ActiveTab, label: 'Inspection History Log', icon: History, roles: ['Admin', 'Inspector'] },
     { id: 'quality-score' as ActiveTab, label: 'Smart Quality Score', icon: Gauge, roles: ['Admin', 'Inspector'] },
+    { id: 'evaluation' as ActiveTab, label: 'CV Testing & Evaluation', icon: FlaskConical, roles: ['Admin', 'Inspector'] },
     { id: 'alerts' as ActiveTab, label: 'Real-Time Critical Alerts', icon: BellRing, roles: ['Admin'] },
     { id: 'settings' as ActiveTab, label: 'System Settings', icon: Sliders, roles: ['Admin', 'Inspector'] },
   ];

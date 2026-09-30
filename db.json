@@ -13,6 +13,20 @@
       "employeeId": "EMP-7701",
       "lastActive": "Just now",
       "createdAt": "2026-09-30T14:35:55.706Z"
+    },
+    {
+      "id": "usr-admin-apex",
+      "name": "Apex Admin",
+      "email": "admin@visioninspect.ai",
+      "password": "password123",
+      "role": "Admin",
+      "status": "Approved",
+      "avatar": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"120\" height=\"120\" viewBox=\"0 0 120 120\"><rect width=\"120\" height=\"120\" rx=\"28\" fill=\"%23090d16\"/><rect x=\"2\" y=\"2\" width=\"116\" height=\"116\" rx=\"26\" fill=\"none\" stroke=\"%2306b6d4\" stroke-width=\"3\" stroke-opacity=\"0.5\"/><circle cx=\"60\" cy=\"48\" r=\"22\" fill=\"%2306b6d4\" fill-opacity=\"0.2\" stroke=\"%2306b6d4\" stroke-width=\"2\"/><text x=\"60\" y=\"56\" font-family=\"monospace, sans-serif\" font-weight=\"bold\" font-size=\"22\" fill=\"%23f8fafc\" text-anchor=\"middle\">A</text><rect x=\"20\" y=\"82\" width=\"80\" height=\"20\" rx=\"6\" fill=\"%2306b6d4\"/><text x=\"60\" y=\"96\" font-family=\"sans-serif\" font-weight=\"bold\" font-size=\"10\" fill=\"%23090d16\" text-anchor=\"middle\" letter-spacing=\"1\">ADMIN</text></svg>",
+      "factoryId": "fac-1",
+      "factoryName": "Apex Precision Works",
+      "employeeId": "ADM-001",
+      "lastActive": "Just now",
+      "createdAt": "2026-09-30T15:42:00.642Z"
     }
   ],
   "inspections": [
