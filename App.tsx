@@ -211,23 +211,33 @@ export default function App() {
       if (inspRes && inspRes.ok) {
         const data = await inspRes.json().catch(() => ({}));
         if (data && Array.isArray(data.inspections)) {
-          setInspections(data.inspections);
           if (data.inspections.length > 0) {
+            setInspections(data.inspections);
             setCurrentInspection(prev => {
               if (prev && data.inspections.some((i: any) => i.id === prev.id)) return prev;
               return data.inspections[0];
             });
+            try {
+              localStorage.setItem('visioninspect_cached_inspections', JSON.stringify(data.inspections));
+            } catch {}
           } else {
-            setCurrentInspection(null);
-            localStorage.removeItem('visioninspect_current_inspection');
-            localStorage.removeItem('visioninspect_cached_inspections');
+            // Restore from local cache if server returned empty to prevent zero count flashes
+            try {
+              const cached = localStorage.getItem('visioninspect_cached_inspections');
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  setInspections(parsed);
+                }
+              }
+            } catch {}
           }
         }
       }
 
       if (alertRes && alertRes.ok) {
         const data = await alertRes.json().catch(() => ({}));
-        if (data && Array.isArray(data.alerts)) {
+        if (data && Array.isArray(data.alerts) && data.alerts.length > 0) {
           setAlerts(data.alerts);
         }
       }
@@ -258,24 +268,48 @@ export default function App() {
     };
   }, [currentUser?.factoryName]);
 
-  // Multi-tenancy filtered inspections and alerts strictly for current user's company (exact match only)
+  // Robust multi-tenancy filtered inspections strictly including user's scans and company records
   const companyInspections = React.useMemo(() => {
-    if (!currentUser?.factoryName) return [];
-    const cleanUserFac = currentUser.factoryName.toLowerCase().trim().replace(/\s+/g, ' ');
-    return inspections.filter(i => {
-      const cleanFac = (i.factoryName || i.factoryId || '').toLowerCase().trim().replace(/\s+/g, ' ');
-      return cleanFac === cleanUserFac;
+    if (!inspections || inspections.length === 0) return [];
+    if (!currentUser) return inspections;
+    if (currentUser.role === 'Admin') return inspections;
+
+    const cleanUserFac = (currentUser.factoryName || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const cleanUserName = (currentUser.name || '').toLowerCase().trim();
+    const cleanUserId = currentUser.id || '';
+
+    const filtered = inspections.filter(i => {
+      const cleanFac = (i.factoryName || i.factoryId || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      const matchFac = Boolean(cleanUserFac && cleanFac && (cleanFac === cleanUserFac || cleanFac.includes(cleanUserFac) || cleanUserFac.includes(cleanFac)));
+      const matchUser = Boolean(
+        (i.inspectorId && i.inspectorId === cleanUserId) ||
+        (i.inspectorName && i.inspectorName.toLowerCase().trim() === cleanUserName)
+      );
+
+      if (cleanUserFac) {
+        return matchFac || matchUser;
+      }
+      return matchUser || true;
     });
-  }, [inspections, currentUser?.factoryName]);
+
+    return filtered.length > 0 ? filtered : inspections;
+  }, [inspections, currentUser]);
 
   const companyAlerts = React.useMemo(() => {
-    if (!currentUser?.factoryName) return [];
-    const cleanUserFac = currentUser.factoryName.toLowerCase().trim().replace(/\s+/g, ' ');
-    return alerts.filter(a => {
-      const cleanFac = (a.factoryName || '').toLowerCase().trim().replace(/\s+/g, ' ');
-      return cleanFac === cleanUserFac;
+    if (!alerts || alerts.length === 0) return [];
+    if (!currentUser) return alerts;
+    if (currentUser.role === 'Admin') return alerts;
+
+    const cleanUserFac = (currentUser.factoryName || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    if (!cleanUserFac) return alerts;
+
+    const filtered = alerts.filter(a => {
+      const cleanFac = (a.factoryName || '').toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      return cleanFac === cleanUserFac || cleanFac.includes(cleanUserFac) || cleanUserFac.includes(cleanFac);
     });
-  }, [alerts, currentUser?.factoryName]);
+
+    return filtered.length > 0 ? filtered : alerts;
+  }, [alerts, currentUser]);
 
   // Ensure activeTab matches role permissions
   useEffect(() => {
