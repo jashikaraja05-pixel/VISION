@@ -40,8 +40,8 @@ import { setupGlobalClickSound } from './utils/audioAlert';
 export default function App() {
   // Always require explicit sign-in when entering application (no auto-login)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [showSplash, setShowSplash] = useState<boolean>(true);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [showSplash, setShowSplash] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>('Admin');
 
   const [pendingAdminUser, setPendingAdminUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -150,50 +150,13 @@ export default function App() {
     }
   }, [currentInspection]);
 
-  // Verify and refresh active session from database on mount (clear stale sessions if purged from DB)
+  // Clear any stale cached session and inspections on application startup to ensure fresh entry
   useEffect(() => {
-    const cachedSession = localStorage.getItem('vision_inspect_session');
-    let userToCheck = currentUser;
-    if (!userToCheck && cachedSession) {
-      try {
-        userToCheck = JSON.parse(cachedSession);
-      } catch {
-        localStorage.removeItem('vision_inspect_session');
-      }
-    }
-
-    if (userToCheck?.email || userToCheck?.id) {
-      fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: userToCheck.id, email: userToCheck.email })
-      })
-      .then(res => {
-        if (!res.ok) {
-          // Account was purged from database - clear session immediately to ensure 100% fresh start
-          localStorage.removeItem('vision_inspect_session');
-          localStorage.removeItem('visioninspect_cached_inspections');
-          localStorage.removeItem('visioninspect_current_inspection');
-          setCurrentUser(null);
-          setSelectedRole(null);
-        } else {
-          return res.json().then(data => {
-            if (data && data.success && data.user) {
-              setCurrentUser(data.user);
-              localStorage.setItem('vision_inspect_session', JSON.stringify(data.user));
-            } else {
-              localStorage.removeItem('vision_inspect_session');
-              setCurrentUser(null);
-              setSelectedRole(null);
-            }
-          });
-        }
-      })
-      .catch(() => {});
-    } else {
-      localStorage.removeItem('vision_inspect_session');
-      setCurrentUser(null);
-    }
+    localStorage.removeItem('vision_inspect_session');
+    localStorage.removeItem('visioninspect_cached_inspections');
+    localStorage.removeItem('visioninspect_current_inspection');
+    setCurrentUser(null);
+    setSelectedRole('Admin');
   }, []);
 
   // Sync real database records on mount
@@ -212,33 +175,19 @@ export default function App() {
       if (inspRes && inspRes.ok) {
         const data = await inspRes.json().catch(() => ({}));
         if (data && Array.isArray(data.inspections)) {
-          if (data.inspections.length > 0) {
-            setInspections(data.inspections);
-            setCurrentInspection(prev => {
-              if (prev && data.inspections.some((i: any) => i.id === prev.id)) return prev;
-              return data.inspections[0];
-            });
-            try {
-              localStorage.setItem('visioninspect_cached_inspections', JSON.stringify(data.inspections));
-            } catch {}
-          } else {
-            // Restore from local cache if server returned empty to prevent zero count flashes
-            try {
-              const cached = localStorage.getItem('visioninspect_cached_inspections');
-              if (cached) {
-                const parsed = JSON.parse(cached);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                  setInspections(parsed);
-                }
-              }
-            } catch {}
-          }
+          setInspections(data.inspections);
+          setCurrentInspection(prev => {
+            if (prev && data.inspections.some((i: any) => i.id === prev.id)) {
+              return data.inspections.find((i: any) => i.id === prev.id) || prev;
+            }
+            return data.inspections.length > 0 ? data.inspections[0] : null;
+          });
         }
       }
 
       if (alertRes && alertRes.ok) {
         const data = await alertRes.json().catch(() => ({}));
-        if (data && Array.isArray(data.alerts) && data.alerts.length > 0) {
+        if (data && Array.isArray(data.alerts)) {
           setAlerts(data.alerts);
         }
       }
@@ -534,6 +483,8 @@ export default function App() {
                 setCurrentInspection(insp);
                 setActiveTab('reports');
               }}
+              onDeleteInspection={handleDeleteInspection}
+              onUpdateUser={handleEditUser}
             />
           )}
 

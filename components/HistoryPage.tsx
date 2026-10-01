@@ -261,9 +261,7 @@ export const HistoryPage: React.FC<HistoryPageProps> = ({
                             {onDeleteInspection && (
                               <button
                                 onClick={() => {
-                                  if (confirm(`Admin confirmation: Delete inspection record for ${record.componentName} (${record.id})?`)) {
-                                    onDeleteInspection(record.id);
-                                  }
+                                  onDeleteInspection(record.id);
                                 }}
                                 className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
                                 title="Admin: Delete Record & Image"

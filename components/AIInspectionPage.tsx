@@ -88,11 +88,18 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
     if (currentInspection) {
       setComponentNameInput(currentInspection.componentName || 'Precision Assembly Component');
       setInspectionResult(currentInspection);
+      setCapturedPhoto(null);
+      setCvRejectionError(null);
       if (currentInspection.imageQuality) {
         setCvQualityMetrics(currentInspection.imageQuality);
       }
+    } else {
+      setInspectionResult(null);
+      setCvQualityMetrics(null);
+      setCapturedPhoto(null);
+      setCvRejectionError(null);
     }
-  }, [currentInspection]);
+  }, [currentInspection?.id, currentInspection]);
 
   // Camera State
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -239,7 +246,22 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
   const handleFileUpload = async (file: File) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert(`Invalid File Format (${file.name}): Please select a valid product scan image (PNG, JPG, JPEG, WEBP, TIFF, or BMP) for AI visual inspection.`);
+      setCvRejectionError({
+        reason: `Unsupported format (${file.name}): File must be a valid image format (PNG, JPG, JPEG, WEBP, or TIFF).`,
+        recommendation: 'Please select a standard industrial component image file to continue.',
+        metrics: {
+          status: 'FAILED',
+          width: 0,
+          height: 0,
+          brightness: 0,
+          brightnessStatus: 'Under-exposed',
+          blurScore: 0,
+          clarityStatus: 'Blurry',
+          contrastScore: 0,
+          contrastStatus: 'Low',
+          opencvProcessingTimeMs: 0
+        }
+      });
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

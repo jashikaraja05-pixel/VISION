@@ -126,7 +126,7 @@ function loadDB(): DBData {
   if (!Array.isArray(db.alerts)) db.alerts = [];
   if (!Array.isArray(db.messages)) db.messages = [];
 
-  // Ensure Admin and Inspector accounts for Apex Precision Works are always available
+  // Ensure Administrator account for Apex Precision Works is always present as system root
   if (!db.users.some(u => u.role === 'Admin')) {
     db.users.push({
       id: 'usr-admin-apex',
@@ -139,23 +139,6 @@ function loadDB(): DBData {
       factoryId: 'fac-1',
       factoryName: 'Apex Precision Works',
       employeeId: 'ADM-001',
-      lastActive: 'Just now',
-      createdAt: new Date().toISOString()
-    });
-  }
-
-  if (!db.users.some(u => u.name && u.name.toLowerCase() === 'angel')) {
-    db.users.push({
-      id: 'usr-angel',
-      name: 'angel',
-      email: 'angel@visioninspect.ai',
-      password: 'password123',
-      role: 'Inspector',
-      status: 'Approved',
-      avatar: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="%23090d16"/><rect x="2" y="2" width="116" height="116" rx="26" fill="none" stroke="%2310b981" stroke-width="3" stroke-opacity="0.5"/><circle cx="60" cy="48" r="22" fill="%2310b981" fill-opacity="0.2" stroke="%2310b981" stroke-width="2"/><text x="60" y="56" font-family="monospace, sans-serif" font-weight="bold" font-size="22" fill="%23f8fafc" text-anchor="middle">A</text><rect x="20" y="82" width="80" height="20" rx="6" fill="%2310b981"/><text x="60" y="96" font-family="sans-serif" font-weight="bold" font-size="10" fill="%23090d16" text-anchor="middle" letter-spacing="1">INSPECTOR</text></svg>',
-      factoryId: 'fac-1',
-      factoryName: 'Apex Precision Works',
-      employeeId: 'EMP-7701',
       lastActive: 'Just now',
       createdAt: new Date().toISOString()
     });
@@ -262,92 +245,6 @@ function loadDB(): DBData {
         verdict: 'PASS',
         notes: 'Verifies low-light rejection gate prompts inspector for ring illumination.',
         timestamp: new Date().toLocaleString()
-      }
-    ];
-  }
-
-  // Ensure default competition inspection record is present so counts are never 0
-  if (!Array.isArray(db.inspections) || db.inspections.length === 0) {
-    db.inspections = [
-      {
-        id: 'insp-pcb-1785480291504',
-        componentName: 'SMT Circuit Board - PCB Assembly',
-        componentCode: 'COMP-7701',
-        batchNumber: 'BATCH-2026-884',
-        factoryId: 'fac-1',
-        factoryName: 'Apex Precision Works',
-        lineId: 'line-1',
-        lineName: 'Line Alpha - Heavy Gear Assembly',
-        cameraId: 'cam-101',
-        inspectorName: 'angel',
-        inspectorId: 'EMP-7701',
-        imageOriginal: '/sample_pcb_defect_1785480291504.jpg',
-        imageProcessed: '/sample_pcb_defect_1785480291504.jpg',
-        status: 'FAIL',
-        decision: 'Reject',
-        qualityScore: 32,
-        confidence: 99.4,
-        processingTimeMs: 142,
-        timestamp: new Date().toLocaleString(),
-        notes: 'High-precision optical calibration locked on PCB Burn Mark (R20, R21).',
-        imageQuality: {
-          status: 'PASSED',
-          width: 1024,
-          height: 1024,
-          brightness: 114.2,
-          brightnessStatus: 'Optimal',
-          blurScore: 168.4,
-          clarityStatus: 'Sharp',
-          contrastScore: 58.4,
-          contrastStatus: 'Optimal',
-          opencvProcessingTimeMs: 18,
-        },
-        detectedDefectName: 'Burn Mark',
-        defectCategory: 'Thermal Damage',
-        severityLevel: 'Critical',
-        visualEvidence: 'Thermal scorching, localized burn mark and charred SMD passive components (R20/R21/C8) detected on PCB circuit surface.',
-        explanationText: 'Thermal overload during operation or reflow overheating causing component charring and substrate discoloration.',
-        recommendedAction: 'Quarantine component immediately. Initiate scrap or component replacement protocol.',
-        validationInfo: {
-          imageQualityStatus: 'PASSED',
-          dimensions: '1024×1024 px',
-          preprocessingStatus: 'OpenCV Bilateral Smoothing & Luminance Normalization Completed',
-          aiProcessingStatus: 'Gemini Industrial Computer Vision Inference Completed',
-          inspectionStatus: 'Inspection Verified: Defect REJECT',
-          opencvTimeMs: 18,
-          aiInferenceTimeMs: 124,
-          totalPipelineTimeMs: 142,
-          aiConfidence: 99.4,
-        },
-        defects: [
-          {
-            id: 'burn-1785480291504',
-            type: 'Burn Mark',
-            severity: 'Critical',
-            confidence: 99.4,
-            bbox: { x: 58, y: 52, width: 14, height: 16, label: 'Charred Burn Region (R20, R21)' },
-            explanation: 'Thermal scorching, localized burn mark and charred SMD passive components (R20/R21/C8) on PCB surface.',
-            reason: 'Severe thermal overload or electrical surge causing component charring.'
-          }
-        ]
-      }
-    ];
-  }
-
-  if (!Array.isArray(db.alerts) || db.alerts.length === 0) {
-    db.alerts = [
-      {
-        id: 'alt-pcb-1785480291504',
-        inspectionId: 'insp-pcb-1785480291504',
-        defectType: 'Burn Mark',
-        severity: 'Critical',
-        message: 'CRITICAL ANOMALY: Burn Mark detected on SMT Circuit Board - PCB Assembly. Action required!',
-        timestamp: new Date().toISOString(),
-        status: 'New',
-        channels: ['dashboard', 'email', 'sms'],
-        factoryName: 'Apex Precision Works',
-        location: 'Line Alpha - Heavy Gear Assembly (Node 1)',
-        acknowledgedBy: null
       }
     ];
   }
@@ -658,6 +555,29 @@ async function startServer() {
     return res.json({ success: true, user });
   });
 
+  // LIST REGISTERED ADMIN COMPANIES (For Inspector Registration discovery)
+  app.get('/api/auth/registered-companies', (_req, res) => {
+    const db = loadDB();
+    const companies: { companyName: string; adminName: string; adminEmail: string }[] = [];
+    const seen = new Set<string>();
+
+    db.users.forEach(u => {
+      if (u.role === 'Admin' && u.factoryName && u.factoryName.trim()) {
+        const key = u.factoryName.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          companies.push({
+            companyName: u.factoryName.trim(),
+            adminName: u.name,
+            adminEmail: u.email
+          });
+        }
+      }
+    });
+
+    res.json({ success: true, companies });
+  });
+
   // REAL-TIME COMPANY UNIQUENESS & VALIDATION CHECK ENDPOINT
   app.get('/api/auth/check-company', (req, res) => {
     const rawName = (req.query.name as string || '').trim();
@@ -667,12 +587,15 @@ async function startServer() {
     }
 
     const db = loadDB();
+    const cleanAlnum = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const cleanTarget = rawName.toLowerCase().trim().replace(/\s+/g, ' ');
+    const targetAlnum = cleanAlnum(rawName);
 
     const existingAdmin = db.users.find(u => {
       if (u.role !== 'Admin' || !u.factoryName) return false;
       const adminComp = u.factoryName.toLowerCase().trim().replace(/\s+/g, ' ');
-      return adminComp === cleanTarget;
+      const adminAlnum = cleanAlnum(u.factoryName);
+      return adminComp === cleanTarget || (targetAlnum.length >= 3 && adminAlnum === targetAlnum);
     });
 
     if (role === 'Admin') {
@@ -758,13 +681,15 @@ async function startServer() {
     }
 
     // 3. INSPECTOR REGISTRATION: Strict Exact Company Admin Discovery
-    // Only match an Administrator with the EXACT same company name (no substring or fallback to other companies)
     let matchingCompanyAdmin: UserAccount | null = null;
     if (assignedRole === 'Inspector') {
+      const cleanAlnum = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const targetAlnum = cleanAlnum(rawCompany);
       matchingCompanyAdmin = db.users.find(u => {
         if (u.role !== 'Admin' || !u.factoryName) return false;
         const comp = u.factoryName.toLowerCase().trim().replace(/\s+/g, ' ');
-        return comp === normCompany;
+        const compAlnum = cleanAlnum(u.factoryName);
+        return comp === normCompany || (targetAlnum.length >= 3 && compAlnum === targetAlnum);
       }) || null;
     }
 
@@ -854,27 +779,6 @@ async function startServer() {
       (cleanEmail && u.email.toLowerCase().trim() === cleanEmail) ||
       (cleanEmail && u.name && u.name.toLowerCase().trim() === cleanEmail)
     );
-
-    if (!user && (id || cleanEmail)) {
-      const isAngel = cleanEmail.includes('angel') || (id && id.includes('angel'));
-      const fallbackName = cleanEmail.includes('@') ? cleanEmail.split('@')[0] : (cleanEmail || 'angel');
-      const restoredUser: UserAccount = {
-        id: id || (isAngel ? 'usr-angel' : `usr-${Date.now()}`),
-        name: fallbackName,
-        email: cleanEmail.includes('@') ? cleanEmail : `${fallbackName}@visioninspect.ai`,
-        role: 'Inspector',
-        status: 'Approved',
-        avatar: `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#090d16"/><circle cx="60" cy="48" r="22" fill="#10b981" fill-opacity="0.2" stroke="#10b981" stroke-width="2"/><text x="60" y="56" font-family="sans-serif" font-weight="bold" font-size="22" fill="#f8fafc" text-anchor="middle">A</text><rect x="20" y="82" width="80" height="20" rx="6" fill="#10b981"/><text x="60" y="96" font-family="sans-serif" font-weight="bold" font-size="10" fill="#090d16" text-anchor="middle">INSPECTOR</text></svg>')}`,
-        factoryId: 'fac-1',
-        factoryName: 'Apex Precision Works',
-        employeeId: 'EMP-7701',
-        lastActive: 'Just now',
-        createdAt: new Date().toISOString(),
-      };
-      db.users.push(restoredUser);
-      saveDB(db);
-      user = restoredUser;
-    }
 
     if (!user) {
       return res.status(404).json({ error: 'User account not found or removed.' });
@@ -1123,9 +1027,9 @@ async function startServer() {
 
     // Cross-company approval security guard: Administrator cannot approve an inspector from a different company!
     if (adminCompany && user.factoryName) {
-      const normAdminComp = String(adminCompany).toLowerCase().trim().replace(/\s+/g, ' ');
-      const normUserComp = String(user.factoryName).toLowerCase().trim().replace(/\s+/g, ' ');
-      if (normAdminComp !== normUserComp) {
+      const normAdminComp = String(adminCompany).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      const normUserComp = String(user.factoryName).toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+      if (normAdminComp && normUserComp && normAdminComp !== normUserComp) {
         return res.status(403).json({
           error: `Company Mismatch Error: You are logged in as Administrator for '${adminCompany}'. You cannot approve or modify inspector '${user.name}' who is registered under company '${user.factoryName}'.`
         });
@@ -1241,17 +1145,14 @@ async function startServer() {
     const { factoryName, all } = req.query;
     let records = Array.isArray(db.inspections) ? db.inspections : [];
     
-    // Strict multi-tenant company filtering: return inspections belonging to this company, or all if none matched
+    // Strict multi-tenant company filtering: return inspections belonging to this company
     if (all !== 'true' && factoryName && factoryName !== 'all') {
       const cleanF = (factoryName as string).toLowerCase().replace(/[^a-z0-9]/g, '');
       if (cleanF) {
-        const filtered = records.filter(i => {
+        records = records.filter(i => {
           const cleanI = (i.factoryName || i.factoryId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
           return cleanI === cleanF || (cleanF.length >= 3 && cleanI.includes(cleanF)) || (cleanI.length >= 3 && cleanF.includes(cleanI));
         });
-        if (filtered.length > 0) {
-          records = filtered;
-        }
       }
     }
 
@@ -1341,13 +1242,14 @@ async function startServer() {
   app.delete('/api/inspections/:id', (req, res) => {
     const { id } = req.params;
     const db = loadDB();
+    const targetId = String(id || '').trim();
     const initialLen = db.inspections.length;
-    db.inspections = db.inspections.filter(i => i.id !== id);
+    db.inspections = db.inspections.filter(i => String(i.id || '').trim() !== targetId);
     if (Array.isArray(db.alerts)) {
-      db.alerts = db.alerts.filter(a => a.inspectionId !== id);
+      db.alerts = db.alerts.filter(a => String(a.inspectionId || '').trim() !== targetId);
     }
     if (Array.isArray(db.messages)) {
-      db.messages = db.messages.filter(m => m.inspectionId !== id);
+      db.messages = db.messages.filter(m => String(m.inspectionId || '').trim() !== targetId);
     }
 
     saveDB(db);
@@ -1603,7 +1505,7 @@ JSON Output Schema:
 - overallConfidence: percentage 0-100
 - processingTimeMs: number`;
 
-        const modelsToTry = ['gemini-3.1-flash-lite', 'gemini-flash-latest', 'gemini-3.8-flash', 'gemini-3.1-pro-preview'];
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'];
         for (const modelName of modelsToTry) {
           try {
             const aiPromise = genAI.models.generateContent({

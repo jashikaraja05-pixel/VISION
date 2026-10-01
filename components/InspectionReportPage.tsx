@@ -130,9 +130,7 @@ export const InspectionReportPage: React.FC<InspectionReportPageProps> = ({
           {currentUser?.role === 'Admin' && onDeleteInspection && (
             <button
               onClick={() => {
-                if (confirm(`Admin confirmation: Delete inspection record ${inspection.id} and associated image assets?`)) {
-                  onDeleteInspection(inspection.id);
-                }
+                onDeleteInspection(inspection.id);
               }}
               className="inline-flex items-center space-x-1.5 rounded-xl border border-rose-500/40 bg-rose-500/10 px-3.5 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
               title="Admin: Permanently Delete Record"

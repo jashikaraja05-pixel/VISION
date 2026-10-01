@@ -34,16 +34,19 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   const [factoryName, setFactoryName] = useState(currentUser?.factoryName || 'Factory Alpha');
   const [employeeId, setEmployeeId] = useState('');
 
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
+
   const isAdmin = currentUser?.role === 'Admin';
   const cleanStr = (s?: string) => (s || '').toLowerCase().trim().replace(/\s+/g, ' ');
   const adminCompany = cleanStr(currentUser?.factoryName);
 
-  // Filter out Admins: Only Inspectors are displayed in Inspector Directory, matched STRICTLY to the Admin's company (Exact match only)
+  // Filter out Admins: Only Inspectors are displayed in Inspector Directory, matched to the Admin's company
   const filteredUsers = users.filter(usr => {
     if (usr.role === 'Admin') return false; // Exclude admin login details
     if (!adminCompany) return true;
-    const userCompany = cleanStr(usr.factoryName);
-    return userCompany === adminCompany; // Strict exact match! No partial or substring match (e.g. "industry" does NOT match "industryy")
+    const userCompany = cleanStr(usr.factoryName).replace(/[^a-z0-9]/g, '');
+    const cleanAdmin = adminCompany.replace(/[^a-z0-9]/g, '');
+    return !cleanAdmin || !userCompany || userCompany === cleanAdmin || userCompany.includes(cleanAdmin) || cleanAdmin.includes(userCompany);
   });
 
   const generateSecurePassword = () => {
@@ -61,7 +64,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    alert(`${label} copied to clipboard!`);
+    setActionNotice(`${label} copied to clipboard!`);
+    setTimeout(() => setActionNotice(null), 3000);
   };
 
   // Prevent Print / Screenshot key combinations for Inspector
@@ -76,7 +80,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
         ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 's' || e.key === 'S'))
       ) {
         e.preventDefault();
-        alert('Security Alert: Screenshot and document capture capabilities are strictly restricted for Certified Inspector accounts.');
+        setActionNotice('Security Alert: Screenshot and document capture capabilities are strictly restricted for Certified Inspector accounts.');
+        setTimeout(() => setActionNotice(null), 4000);
       }
     };
 
@@ -95,7 +100,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
   const handleOpenAdd = () => {
     if (!isAdmin) {
-      alert('Permission Denied: User provisioning is restricted to Administrators.');
+      setActionNotice('Permission Denied: User provisioning is restricted to Administrators.');
+      setTimeout(() => setActionNotice(null), 3000);
       return;
     }
     setEditingUser(null);
@@ -110,7 +116,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
   const handleOpenEdit = (user: User) => {
     if (!isAdmin) {
-      alert('Permission Denied: User editing is restricted to Administrators.');
+      setActionNotice('Permission Denied: User editing is restricted to Administrators.');
+      setTimeout(() => setActionNotice(null), 3000);
       return;
     }
     setEditingUser(user);
@@ -239,10 +246,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       if (res.ok) {
         const data = await res.json();
         onEditUser(data.user || { ...user, status: 'Approved' });
+        setActionNotice(`Inspector ${user.name} approved successfully.`);
+        setTimeout(() => setActionNotice(null), 4000);
       } else {
         const data = await res.json().catch(() => ({}));
-        if (data.error) alert(data.error);
-        onEditUser({ ...user, status: 'Approved' });
+        setActionNotice(data.error || 'Approval failed.');
+        setTimeout(() => setActionNotice(null), 4000);
       }
     } catch {
       onEditUser({ ...user, status: 'Approved' });
@@ -261,10 +270,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       if (res.ok) {
         const data = await res.json();
         onEditUser(data.user || { ...user, status: nextStatus });
+        setActionNotice(`Account status updated to ${nextStatus}.`);
+        setTimeout(() => setActionNotice(null), 3000);
       } else {
         const data = await res.json().catch(() => ({}));
-        if (data.error) alert(data.error);
-        onEditUser({ ...user, status: nextStatus });
+        setActionNotice(data.error || 'Status update failed.');
+        setTimeout(() => setActionNotice(null), 3000);
       }
     } catch {
       onEditUser({ ...user, status: nextStatus });
@@ -273,24 +284,22 @@ export const UserManagement: React.FC<UserManagementProps> = ({
 
   const handleDeleteUserClick = async (usr: User) => {
     if (!isAdmin) {
-      alert('Security Alert: Only Administrators can delete accounts.');
+      setActionNotice('Security Alert: Only Administrators can delete accounts.');
+      setTimeout(() => setActionNotice(null), 3000);
       return;
     }
     if (usr.role === 'Admin') {
-      alert('Security Protection: Administrator accounts cannot be deleted.');
+      setActionNotice('Security Protection: Administrator accounts cannot be deleted.');
+      setTimeout(() => setActionNotice(null), 3000);
       return;
     }
-    if (window.confirm(`Admin Confirmation: Are you sure you want to permanently delete inspector account "${usr.name}" (${usr.email})? This action cannot be undone.`)) {
-      try {
-        const res = await fetch(`/api/users/${usr.id}`, { method: 'DELETE' });
-        if (res.ok) {
-          onDeleteUser(usr.id);
-        } else {
-          onDeleteUser(usr.id);
-        }
-      } catch {
-        onDeleteUser(usr.id);
-      }
+    try {
+      onDeleteUser(usr.id);
+      await fetch(`/api/users/${usr.id}`, { method: 'DELETE' });
+      setActionNotice(`Inspector ${usr.name} removed from registry.`);
+      setTimeout(() => setActionNotice(null), 3000);
+    } catch {
+      onDeleteUser(usr.id);
     }
   };
 
@@ -298,16 +307,16 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     if (!isAdmin) return;
     const inactiveUsers = filteredUsers.filter(u => u.status === 'Disabled' || u.status === 'Rejected');
     if (inactiveUsers.length === 0) return;
-    if (window.confirm(`Confirm Purge: Permanently delete all ${inactiveUsers.length} rejected/disabled inspector accounts?`)) {
-      for (const u of inactiveUsers) {
-        try {
-          await fetch(`/api/users/${u.id}`, { method: 'DELETE' });
-          onDeleteUser(u.id);
-        } catch {
-          onDeleteUser(u.id);
-        }
+    for (const u of inactiveUsers) {
+      try {
+        onDeleteUser(u.id);
+        await fetch(`/api/users/${u.id}`, { method: 'DELETE' });
+      } catch {
+        onDeleteUser(u.id);
       }
     }
+    setActionNotice(`Purged ${inactiveUsers.length} inactive inspector accounts.`);
+    setTimeout(() => setActionNotice(null), 3000);
   };
 
   return (
@@ -369,6 +378,14 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           )}
         </div>
       </div>
+
+      {/* Action Notification Banner */}
+      {actionNotice && (
+        <div className="p-3.5 rounded-xl bg-slate-900 border border-purple-500/40 text-xs font-mono text-purple-200 flex items-center justify-between shadow-lg">
+          <span>{actionNotice}</span>
+          <button onClick={() => setActionNotice(null)} className="text-slate-400 hover:text-white ml-2 text-xs">✕</button>
+        </div>
+      )}
 
       {/* Record Downloads & Export Bar */}
       <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-4 space-y-3 shadow-lg">

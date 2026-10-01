@@ -37,6 +37,8 @@ interface AdminDashboardProps {
   currentUser?: User | null;
   onSelectInspection?: (inspection: InspectionRecord) => void;
   onNavigateToUsers?: () => void;
+  onDeleteInspection?: (id: string) => void;
+  onUpdateUser?: (updatedUser: User) => void;
   inspections?: InspectionRecord[];
   users?: User[];
 }
@@ -45,6 +47,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   currentUser, 
   onSelectInspection,
   onNavigateToUsers,
+  onDeleteInspection,
+  onUpdateUser,
   inspections: propInspections,
   users: propUsers
 }) => {
@@ -53,16 +57,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [inspections, setInspections] = useState<InspectionRecord[]>(propInspections || []);
   const [loading, setLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<string>('ALL');
+  const [approvalNotice, setApprovalNotice] = useState<string | null>(null);
 
   // Sync with props if provided
   useEffect(() => {
-    if (propInspections && propInspections.length > 0) {
+    if (propInspections !== undefined) {
       setInspections(propInspections);
     }
   }, [propInspections]);
 
   useEffect(() => {
-    if (propUsers && propUsers.length > 0) {
+    if (propUsers !== undefined) {
       setUsers(propUsers);
     }
   }, [propUsers]);
@@ -103,14 +108,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   }, []);
 
   const handleDeleteInspection = async (id: string) => {
-    if (window.confirm(`Admin: Permanently delete inspection record #${id} from the database?`)) {
-      try {
-        await fetch(`/api/inspections/${id}`, { method: 'DELETE' });
-        setInspections(prev => prev.filter(i => i.id !== id));
-      } catch {
-        setInspections(prev => prev.filter(i => i.id !== id));
-      }
+    try {
+      setInspections(prev => prev.filter(i => i.id !== id));
+      onDeleteInspection?.(id);
+      await fetch(`/api/inspections/${id}`, { method: 'DELETE' });
+      fetchData();
+    } catch {
+      setInspections(prev => prev.filter(i => i.id !== id));
+      onDeleteInspection?.(id);
     }
+  };
+
+  const handleApproveInspector = async (inspectorUser: User) => {
+    try {
+      setApprovalNotice(`Approving account for ${inspectorUser.name}...`);
+      const res = await fetch(`/api/users/${inspectorUser.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Approved', adminCompany: currentUser?.factoryName }),
+      });
+      if (res.ok) {
+        const approvedUser = { ...inspectorUser, status: 'Approved' as const };
+        setUsers(prev => prev.map(u => u.id === inspectorUser.id ? approvedUser : u));
+        onUpdateUser?.(approvedUser);
+        setApprovalNotice(`✅ Inspector ${inspectorUser.name} (${inspectorUser.email}) approved! They can now sign in with their password.`);
+        setTimeout(() => setApprovalNotice(null), 6000);
+        fetchData();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setApprovalNotice(`❌ Approval failed: ${d.error || 'Server error'}`);
+      }
+    } catch {
+      setApprovalNotice(`❌ Network error approving inspector.`);
+    }
+  };
+
+  const handleRejectInspector = async (inspectorUser: User) => {
+    try {
+      const res = await fetch(`/api/users/${inspectorUser.id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Rejected', adminCompany: currentUser?.factoryName }),
+      });
+      if (res.ok) {
+        const rejectedUser = { ...inspectorUser, status: 'Rejected' as const };
+        setUsers(prev => prev.map(u => u.id === inspectorUser.id ? rejectedUser : u));
+        onUpdateUser?.(rejectedUser);
+        setApprovalNotice(`Inspector ${inspectorUser.name} rejected.`);
+        setTimeout(() => setApprovalNotice(null), 4000);
+        fetchData();
+      }
+    } catch {}
   };
 
   // Helper string cleaner: trimmed lowercase with normalized spaces for strict exact matching
@@ -149,6 +197,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const cleanTarget = cleanStr(selectedFacility);
     return list.filter(u => cleanStr(u.factoryName) === cleanTarget);
   }, [users, selectedFacility]);
+
+  // Pending Inspector Registrations awaiting Admin Approval
+  const pendingInspectors = useMemo(() => {
+    return users.filter(u => {
+      if (u.role !== 'Inspector' || u.status !== 'Pending Approval') return false;
+      if (!currentUser?.factoryName) return true;
+      const cleanAdminComp = cleanStr(currentUser.factoryName).replace(/[^a-z0-9]/g, '');
+      const cleanUserComp = cleanStr(u.factoryName).replace(/[^a-z0-9]/g, '');
+      return !cleanAdminComp || !cleanUserComp || cleanAdminComp === cleanUserComp || cleanAdminComp.includes(cleanUserComp) || cleanUserComp.includes(cleanAdminComp);
+    });
+  }, [users, currentUser?.factoryName]);
 
   // Reliable helper to evaluate pass vs fail across any record formatting
   const isFailedRecord = (i: InspectionRecord) => {
@@ -322,6 +381,92 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Dashboard Overview Main Content */}
       <div className="space-y-8">
+
+        {/* Real-time Status Notice */}
+        {approvalNotice && (
+          <div className="p-3.5 rounded-xl bg-slate-900 border border-cyan-500/40 text-xs font-mono text-cyan-200 flex items-center justify-between shadow-lg">
+            <span>{approvalNotice}</span>
+            <button onClick={() => setApprovalNotice(null)} className="text-slate-400 hover:text-white ml-2 text-xs">✕</button>
+          </div>
+        )}
+
+        {/* PENDING INSPECTOR APPROVAL REQUESTS (Executive Live Queue) */}
+        {pendingInspectors.length > 0 && (
+          <div className="rounded-2xl border-2 border-amber-500/60 bg-amber-500/10 p-5 space-y-4 shadow-[0_0_30px_rgba(245,158,11,0.2)]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-500/30 pb-3">
+              <div className="flex items-center space-x-2 text-amber-300">
+                <Clock className="h-5 w-5 text-amber-400 animate-pulse" />
+                <h2 className="text-sm font-black font-mono tracking-wider uppercase">
+                  Pending Inspector Approval Requests ({pendingInspectors.length})
+                </h2>
+              </div>
+              <span className="text-[11px] font-mono text-amber-300/80">
+                Company: <strong>{currentUser?.factoryName || 'All Plants'}</strong>
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs font-mono">
+                <thead className="bg-slate-950/80 text-amber-300 border-b border-amber-500/20 uppercase tracking-wider">
+                  <tr>
+                    <th className="p-3">Inspector</th>
+                    <th className="p-3">Email Address</th>
+                    <th className="p-3">Employee ID</th>
+                    <th className="p-3">Company Registered</th>
+                    <th className="p-3">Requested At</th>
+                    <th className="p-3 text-right">Approval Decision</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-amber-500/20 bg-slate-900/60">
+                  {pendingInspectors.map((insp) => (
+                    <tr key={insp.id} className="hover:bg-amber-500/10 transition-colors">
+                      <td className="p-3 font-bold text-white flex items-center space-x-2">
+                        <div className="h-7 w-7 rounded-lg overflow-hidden bg-slate-800 border border-amber-400/40 shrink-0">
+                          {insp.avatar ? (
+                            <img src={insp.avatar} alt={insp.name} className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center font-bold text-amber-300">
+                              {insp.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <span>{insp.name}</span>
+                      </td>
+                      <td className="p-3 text-slate-300">{insp.email}</td>
+                      <td className="p-3 text-amber-400 font-bold">{insp.employeeId || 'EMP-NEW'}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-200 text-[10px] font-bold">
+                          {insp.factoryName || currentUser?.factoryName || 'Company'}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-400">
+                        {insp.createdAt ? new Date(insp.createdAt).toLocaleDateString() : 'Just now'}
+                      </td>
+                      <td className="p-3 text-right space-x-2">
+                        <button
+                          onClick={() => handleApproveInspector(insp)}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center space-x-1"
+                          title="Approve access for inspector"
+                        >
+                          <UserCheck className="h-3.5 w-3.5" />
+                          <span>Approve Access</span>
+                        </button>
+                        <button
+                          onClick={() => handleRejectInspector(insp)}
+                          className="px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-mono text-xs transition-all active:scale-95 cursor-pointer inline-flex items-center space-x-1"
+                          title="Reject request"
+                        >
+                          <UserX className="h-3.5 w-3.5" />
+                          <span>Reject</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         
         {/* Key Stat Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -86,7 +86,29 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleEmailInput, setGoogleEmailInput] = useState('');
   const [googleRole, setGoogleRole] = useState<'Admin' | 'Inspector'>('Admin');
-  const [registerRole, setRegisterRole] = useState<'Admin' | 'Inspector'>('Admin');
+  const [activeRole, setActiveRole] = useState<'Admin' | 'Inspector'>(selectedRole === 'Inspector' ? 'Inspector' : 'Admin');
+  const [registerRole, setRegisterRole] = useState<'Admin' | 'Inspector'>(selectedRole === 'Inspector' ? 'Inspector' : 'Admin');
+  const [registeredCompanies, setRegisteredCompanies] = useState<{ companyName: string; adminName: string; adminEmail: string }[]>([]);
+
+  useEffect(() => {
+    if (selectedRole) {
+      setActiveRole(selectedRole);
+      setRegisterRole(selectedRole);
+      setGoogleRole(selectedRole);
+    }
+  }, [selectedRole]);
+
+  // Fetch registered Admin companies for inspector auto-select
+  useEffect(() => {
+    fetch('/api/auth/registered-companies')
+      .then(res => res.json())
+      .then(data => {
+        if (data && Array.isArray(data.companies)) {
+          setRegisteredCompanies(data.companies);
+        }
+      })
+      .catch(() => {});
+  }, [mode, activeRole]);
 
   // Real-time Company Check for Administrator and Inspector
   const [companyStatus, setCompanyStatus] = useState<{
@@ -567,6 +589,47 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         {/* Card Container */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           
+          {/* Direct Role Switching: Administrator Portal vs Certified Inspector Portal */}
+          <div className="grid grid-cols-2 gap-2 mb-6 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRole('Admin');
+                setRegisterRole('Admin');
+                setErrorMessage(null);
+                setPendingNotice(null);
+                setSuccessNotice(null);
+              }}
+              className={`py-2.5 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center space-x-2 ${
+                activeRole === 'Admin'
+                  ? 'bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.25)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <ShieldCheck className="h-4 w-4 text-purple-400" />
+              <span>Admin Portal</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveRole('Inspector');
+                setRegisterRole('Inspector');
+                setErrorMessage(null);
+                setPendingNotice(null);
+                setSuccessNotice(null);
+              }}
+              className={`py-2.5 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center space-x-2 ${
+                activeRole === 'Inspector'
+                  ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.25)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <UserIcon className="h-4 w-4 text-cyan-400" />
+              <span>Inspector Portal</span>
+            </button>
+          </div>
+
           {/* Mode Switcher Tabs */}
           <div className="grid grid-cols-2 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 mb-6">
             <button
@@ -581,43 +644,25 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {selectedRole ? `${selectedRole} Sign In` : 'Sign In'}
+              {activeRole === 'Admin' ? 'Admin Sign In' : 'Inspector Sign In'}
             </button>
 
-            {selectedRole === 'Admin' ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setMode('register');
-                  setRegisterRole('Admin');
-                  setErrorMessage(null);
-                  setPendingNotice(null);
-                }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  mode === 'register'
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Admin Register
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setMode('register');
-                  setRegisterRole('Inspector');
-                  setErrorMessage(null);
-                  setPendingNotice(null);
-                }}
-                className={`py-2 text-xs font-semibold rounded-lg transition-all ${
-                  mode === 'register'
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Inspector Registration
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                setMode('register');
+                setRegisterRole(activeRole);
+                setErrorMessage(null);
+                setPendingNotice(null);
+              }}
+              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+                mode === 'register'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {activeRole === 'Admin' ? 'Register Admin' : 'Register Inspector'}
+            </button>
           </div>
 
           {/* Pending Approval Notice Banner */}
@@ -719,6 +764,27 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 </label>
               </div>
 
+              {/* Quick Fill Helper for Demo / Screen Recording */}
+              {activeRole === 'Admin' ? (
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-[11px] text-purple-300 font-mono">
+                  <span>Demo Admin: admin@visioninspect.ai</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('admin@visioninspect.ai');
+                      setPassword('password123');
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-purple-500/25 hover:bg-purple-500/40 text-purple-200 text-[10px] font-bold transition-all border border-purple-500/40 cursor-pointer"
+                  >
+                    Quick Fill
+                  </button>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-[11px] text-cyan-300 font-mono">
+                  <span>Inspector Login: Enter your approved inspector email &amp; password.</span>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -729,7 +795,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   <span className="animate-spin h-4 w-4 border-2 border-slate-950 border-t-transparent rounded-full" />
                 ) : (
                   <>
-                    <span>Authenticate & Access {selectedRole ? `${selectedRole} Portal` : ''}</span>
+                    <span>Authenticate & Access {activeRole} Portal</span>
                     <ArrowRight className="h-4 w-4" />
                   </>
                 )}
@@ -850,6 +916,31 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   <p className="text-[10px] text-slate-400 mt-1">
                     * Must match an existing registered Admin company name for your administrator to approve your account.
                   </p>
+                )}
+
+                {/* Clickable Registered Admin Companies for 1-click select */}
+                {registerRole === 'Inspector' && registeredCompanies.length > 0 && (
+                  <div className="mt-2.5 p-2 rounded-xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+                    <span className="text-[10px] text-slate-400 font-mono block">
+                      Registered Companies (Click to select):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {registeredCompanies.map((c) => (
+                        <button
+                          key={c.companyName}
+                          type="button"
+                          onClick={() => setFactoryName(c.companyName)}
+                          className={`px-2 py-1 rounded-lg text-[11px] font-mono border transition-all cursor-pointer ${
+                            factoryName.trim().toLowerCase() === c.companyName.toLowerCase()
+                              ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 font-bold shadow-sm'
+                              : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-cyan-500/50 hover:text-white'
+                          }`}
+                        >
+                          🏢 {c.companyName} <span className="text-[9px] text-cyan-400">({c.adminName})</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 
