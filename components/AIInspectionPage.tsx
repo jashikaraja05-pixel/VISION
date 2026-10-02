@@ -254,11 +254,11 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
           width: 0,
           height: 0,
           brightness: 0,
-          brightnessStatus: 'Under-exposed',
+          brightnessStatus: 'Underexposed',
           blurScore: 0,
           clarityStatus: 'Blurry',
           contrastScore: 0,
-          contrastStatus: 'Low',
+          contrastStatus: 'Low Contrast',
           opencvProcessingTimeMs: 0
         }
       });

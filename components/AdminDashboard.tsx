@@ -9,6 +9,8 @@ import {
   UserCheck, 
   UserX, 
   Eye, 
+  EyeOff,
+  Check,
   Building2, 
   Cpu, 
   Activity, 
@@ -58,6 +60,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<string>('ALL');
   const [approvalNotice, setApprovalNotice] = useState<string | null>(null);
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<string, boolean>>({});
 
   // Sync with props if provided
   useEffect(() => {
@@ -205,7 +208,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (!currentUser?.factoryName) return true;
       const cleanAdminComp = cleanStr(currentUser.factoryName).replace(/[^a-z0-9]/g, '');
       const cleanUserComp = cleanStr(u.factoryName).replace(/[^a-z0-9]/g, '');
-      return !cleanAdminComp || !cleanUserComp || cleanAdminComp === cleanUserComp || cleanAdminComp.includes(cleanUserComp) || cleanUserComp.includes(cleanAdminComp);
+      return cleanAdminComp === cleanUserComp;
     });
   }, [users, currentUser?.factoryName]);
 
@@ -411,6 +414,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <tr>
                     <th className="p-3">Inspector</th>
                     <th className="p-3">Email Address</th>
+                    <th className="p-3">Password</th>
                     <th className="p-3">Employee ID</th>
                     <th className="p-3">Company Registered</th>
                     <th className="p-3">Requested At</th>
@@ -433,6 +437,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <span>{insp.name}</span>
                       </td>
                       <td className="p-3 text-slate-300">{insp.email}</td>
+                      <td className="p-3 text-cyan-300 font-mono">
+                        <div className="flex items-center space-x-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 w-fit">
+                          <span className="font-bold select-all">
+                            {revealedPasswords[insp.id] ? (insp.password || '••••••••') : '••••••••'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setRevealedPasswords(prev => ({ ...prev, [insp.id]: !prev[insp.id] }))}
+                            className="text-slate-400 hover:text-white p-0.5 ml-1 transition-colors"
+                            title={revealedPasswords[insp.id] ? "Hide password" : "Show password"}
+                          >
+                            {revealedPasswords[insp.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
+                      </td>
                       <td className="p-3 text-amber-400 font-bold">{insp.employeeId || 'EMP-NEW'}</td>
                       <td className="p-3">
                         <span className="px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-200 text-[10px] font-bold">
@@ -445,11 +464,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <td className="p-3 text-right space-x-2">
                         <button
                           onClick={() => handleApproveInspector(insp)}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono transition-all shadow-md active:scale-95 cursor-pointer inline-flex items-center space-x-1"
-                          title="Approve access for inspector"
+                          className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95 cursor-pointer inline-flex items-center space-x-1.5"
+                          title="Approve access (Tick)"
                         >
-                          <UserCheck className="h-3.5 w-3.5" />
-                          <span>Approve Access</span>
+                          <Check className="h-4 w-4 stroke-[3]" />
+                          <span>Approve (Tick)</span>
                         </button>
                         <button
                           onClick={() => handleRejectInspector(insp)}

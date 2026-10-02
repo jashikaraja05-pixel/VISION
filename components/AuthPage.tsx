@@ -27,14 +27,22 @@ interface AuthPageProps {
   onLoginSuccess: (user: User) => void;
   selectedRole?: 'Admin' | 'Inspector' | null;
   onSwitchRole?: () => void;
+  initialMode?: 'login' | 'register';
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ 
   onLoginSuccess, 
   selectedRole = null,
-  onSwitchRole 
+  onSwitchRole,
+  initialMode = 'login'
 }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register'>(initialMode);
+
+  useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+    }
+  }, [initialMode]);
   
   // Form State
   const [email, setEmail] = useState('');
@@ -579,9 +587,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           {onSwitchRole && (
             <button
               onClick={onSwitchRole}
-              className="mt-3 inline-flex items-center space-x-1.5 text-xs text-cyan-400 hover:text-cyan-300 bg-slate-900/80 px-3 py-1 rounded-full border border-slate-800 hover:border-cyan-500/40 transition-all"
+              className="mt-3 inline-flex items-center space-x-1.5 text-xs text-cyan-400 hover:text-cyan-300 bg-slate-900/80 px-3 py-1.5 rounded-full border border-slate-800 hover:border-cyan-500/40 transition-all font-mono"
             >
-              <span>← Switch Role (Current: {selectedRole || 'Any'})</span>
+              <span>← Back to Role Selection</span>
             </button>
           )}
         </div>
@@ -638,9 +646,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 setErrorMessage(null);
                 setPendingNotice(null);
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2.5 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'login'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
+                  ? activeRole === 'Admin'
+                    ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] font-bold'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -655,13 +665,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 setErrorMessage(null);
                 setPendingNotice(null);
               }}
-              className={`py-2 text-xs font-semibold rounded-lg transition-all ${
+              className={`py-2.5 text-xs font-semibold rounded-lg transition-all ${
                 mode === 'register'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
+                  ? activeRole === 'Admin'
+                    ? 'bg-purple-600 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] font-bold'
+                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 shadow-md font-bold'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {activeRole === 'Admin' ? 'Register Admin' : 'Register Inspector'}
+              {activeRole === 'Admin' ? 'Admin Registration' : 'Inspector Registration'}
             </button>
           </div>
 
@@ -869,12 +881,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
                 {/* Real-time status for Administrator registration */}
                 {registerRole === 'Admin' && companyStatus?.isTaken && (
-                  <div className="mt-2 p-2.5 bg-rose-500/10 border border-rose-500/40 rounded-xl flex items-start gap-2 text-xs text-rose-300">
+                  <div className="mt-2 p-3 bg-rose-500/10 border border-rose-500/40 rounded-xl flex items-start gap-2 text-xs text-rose-300">
                     <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                     <div>
                       <span className="font-semibold text-rose-200">Company Name Already Taken!</span>
-                      <p className="text-[11px] text-rose-300/90 mt-0.5">
-                        {companyStatus.error || `Company name "${companyStatus.companyName || factoryName}" is already registered by another Administrator (${companyStatus.adminName || 'Admin'}). Each company can only have one primary registered Admin. Please enter another company name.`}
+                      <p className="text-[11px] text-rose-300/90 mt-1 leading-relaxed">
+                        The company name &quot;{companyStatus.companyName || factoryName}&quot; is already registered by another Administrator ({companyStatus.adminName || 'Admin'}).
+                      </p>
+                      <p className="text-[11px] text-amber-300 font-semibold mt-1">
+                        👉 Please add extra letters/numbers (e.g. &quot;{factoryName.trim()} Unit 2&quot; or &quot;{factoryName.trim()} Plant B&quot;) or change to a different company name to continue.
                       </p>
                     </div>
                   </div>
@@ -1006,7 +1021,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (registerRole === 'Admin' && Boolean(companyStatus?.isTaken))}
                 className="w-full py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (

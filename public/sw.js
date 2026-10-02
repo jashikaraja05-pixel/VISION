@@ -1,5 +1,5 @@
 // VisionInspect AI Offline Service Worker
-const CACHE_NAME = 'visioninspect-ai-v4.2-cache';
+const CACHE_NAME = 'vision-inspect-ai-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

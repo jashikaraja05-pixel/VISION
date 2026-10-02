@@ -40,8 +40,9 @@ import { setupGlobalClickSound } from './utils/audioAlert';
 export default function App() {
   // Always require explicit sign-in when entering application (no auto-login)
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [showSplash, setShowSplash] = useState<boolean>(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>('Admin');
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [authInitialMode, setAuthInitialMode] = useState<'login' | 'register'>('login');
 
   const [pendingAdminUser, setPendingAdminUser] = useState<User | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -156,7 +157,7 @@ export default function App() {
     localStorage.removeItem('visioninspect_cached_inspections');
     localStorage.removeItem('visioninspect_current_inspection');
     setCurrentUser(null);
-    setSelectedRole('Admin');
+    setSelectedRole(null);
   }, []);
 
   // Sync real database records on mount
@@ -428,13 +429,24 @@ export default function App() {
     }
 
     if (!selectedRole) {
-      return <RoleSelectionPage onSelectRole={(role) => setSelectedRole(role)} />;
+      return (
+        <RoleSelectionPage 
+          onSelectRole={(role, initialMode) => {
+            setSelectedRole(role);
+            setAuthInitialMode(initialMode || 'login');
+          }} 
+        />
+      );
     }
     return (
       <AuthPage
         selectedRole={selectedRole}
+        initialMode={authInitialMode}
         onLoginSuccess={handleLoginSuccess}
-        onSwitchRole={() => setSelectedRole(null)}
+        onSwitchRole={() => {
+          setSelectedRole(null);
+          setAuthInitialMode('login');
+        }}
       />
     );
   }

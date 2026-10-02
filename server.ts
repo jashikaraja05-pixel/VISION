@@ -603,7 +603,7 @@ async function startServer() {
         return res.json({
           available: false,
           isTaken: true,
-          error: `Company name "${existingAdmin.factoryName || rawName}" is already registered by another Administrator (${existingAdmin.name}). Please enter another company name.`,
+          error: `Company name "${existingAdmin.factoryName || rawName}" is already registered by another Administrator (${existingAdmin.name}). Please add extra letters/numbers (e.g. "${rawName} Unit 2" or "${rawName} Plant Alpha") or enter another company name.`,
           companyName: existingAdmin.factoryName,
           adminName: existingAdmin.name,
         });
@@ -2200,14 +2200,13 @@ Active Defects on Component:
 ${defectsSummary}
 
 CRITICAL RULES OF COMMUNICATION & HUMAN-LIKE BEHAVIOR:
-1. UNIVERSAL MULTILINGUAL FLUENCY (ALL LANGUAGES OF THE WORLD):
-   - You MUST detect and respond naturally in whatever language or dialect the user asks in (Tamil, Tanglish, Malayalam, Hindi, Telugu, Kannada, English, Spanish, German, French, Arabic, Chinese, Japanese, etc.)!
-   - If the user writes or asks for Tamil (e.g. "tamil pls", "tamil-la sollu", "தமிழ்ல சொல்லு", "tamizh"): Respond fluently, warmly, and completely in natural Tamil (தமிழ்). Address them politely as "வணக்கம் இன்ஸ்பெக்டர்!" and explain remediation, cleaning, and rework steps in clear, accessible Tamil.
-   - If the user writes in Tanglish (Tamil written with Latin alphabet, e.g. "ithu repair panna mudiyuma?", "clean panna enna pannanum?", "solv aaguma?"): Respond warmly in conversational Tanglish or Tamil.
-   - If the user speaks/asks in Malayalam (മലയാളം, e.g. "ithu repair cheyyan pattumo?", "malayalam pls", "ഇത് ശരിയാക്കാൻ പറ്റുമോ?"): Respond fluently in Malayalam!
-   - If the user speaks/asks in Hindi (हिन्दी, e.g. "kaise theek kare?", "hindi please", "यह ठीक हो सकता है?"): Respond warmly and fluently in Hindi!
-   - If the user speaks/asks in Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Spanish, German, French, or any other language: Respond accurately and fluently in that exact language!
-   - If the user asks in English: Respond in clear, professional, direct English.
+1. UNIVERSAL MULTILINGUAL FLUENCY & AUTOMATIC LANGUAGE DETECTION:
+   - AUTOMATICALLY DETECT the language of the user's message (English, Tamil, Tanglish, Hindi, Malayalam, Telugu, Kannada, Spanish, etc.) and respond DIRECTLY in that EXACT same language!
+   - If the user writes or speaks in English: Respond in clear, professional, direct English.
+   - If the user writes or speaks in Tamil (தமிழ்): Respond fluently, warmly, and completely in natural Tamil (தமிழ்).
+   - If the user writes in Tanglish (Tamil in Latin script, e.g. "ithu repair panna mudiyuma?"): Respond warmly in conversational Tanglish or Tamil.
+   - If the user speaks/asks in Hindi, Malayalam, Telugu, or any other language: Respond accurately and fluently in that exact language.
+   - CRITICAL REQUIREMENT: Do NOT announce or explain the language you are speaking (e.g. NEVER say "This is in Tamil", "I am speaking in Tamil", "Here is the Tamil response"). Simply speak directly and naturally as a native speaker would!
 2. ANSWER PRECISELY WHAT IS ASKED & PHOTO ANALYSIS:
    - If the user attaches an image/photo of a defect, examine the photo closely, diagnose the defect visible in that image (e.g., thermal scorch, burnt resistor R20/R21, solder short, rust), and provide step-by-step resolution advice.
    - If they ask "Can this be resolved?", answer affirmatively and give practical steps to clean, replace components, and restore to factory-neat condition!

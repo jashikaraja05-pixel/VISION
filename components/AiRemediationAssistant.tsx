@@ -89,7 +89,7 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
     if (!hasDefects && !isRejected) {
       initialGreeting = `👋 **Hello Inspector! Excellent News!**\n\n✅ **${inspection.componentName} (${inspection.componentCode})** has passed optical inspection with a quality score of **${inspection.qualityScore}/100**.\n\nAll solder joints, surface contours, and dimensions are in-spec. Feel free to ask me for preventive maintenance checklists, torque parameters, or long-term operational guidelines!`;
     } else {
-      initialGreeting = `👋 **Hello Inspector! Let's resolve this defect together.**\n\n⚠️ **Component**: ${inspection.componentName} (${inspection.componentCode})\n📊 **Verdict**: **${inspection.status} (Quality Score: ${inspection.qualityScore}/100)**\n🔍 **Detected Defect**: **${defectNames}**\n\n**Can this defect be resolved?**\n👉 **Yes!** I can guide you step-by-step on how to fix and rework this neatly (including cleaning burnt/charred areas, rust removal, SMD soldering, and UV sealing) or provide replacement part specifications.\n\nAsk me any question below or click the 🎙️ microphone to speak (Tamil or English — will auto-convert to English)!`;
+      initialGreeting = `👋 **Hello Inspector! Let's resolve this defect together.**\n\n⚠️ **Component**: ${inspection.componentName} (${inspection.componentCode})\n📊 **Verdict**: **${inspection.status} (Quality Score: ${inspection.qualityScore}/100)**\n🔍 **Detected Defect**: **${defectNames}**\n\n**Can this defect be resolved?**\n👉 **Yes!** I can guide you step-by-step on how to fix and rework this neatly (including cleaning burnt/charred areas, rust removal, SMD soldering, and UV sealing) or provide replacement part specifications.\n\nAsk me any question below or click the 🎙️ microphone to speak!`;
     }
 
     setChatHistory([
@@ -170,7 +170,7 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
     const currentPhoto = attachedPhotoPreview;
     
     // If no text but photo is attached, provide default inspection prompt
-    const textToSend = rawText || (currentPhoto ? 'இந்த புகைப்படத்தில் உள்ள குறைபாட்டைப் பார்த்து அதை எவ்வாறு சரிசெய்து நேர்த்தியாக மாற்றுவது என்று விளக்கு (Analyze this defect image and explain how to resolve it neatly).' : '');
+    const textToSend = rawText || (currentPhoto ? 'Analyze this defect photo and explain step-by-step how to resolve and rework it cleanly.' : '');
     if ((!textToSend && !currentPhoto) || isAiThinking) return;
 
     setAttachedPhotoPreview(null);
@@ -412,10 +412,10 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
                   </div>
                   <div>
                     <span className="text-xs font-bold text-cyan-300 font-mono block">
-                      🎙️ LISTENING LIVE ({micLanguage === 'ta-IN' ? 'Tamil / Tanglish' : 'English'})...
+                      🎙️ LISTENING LIVE...
                     </span>
                     <span className="text-[11px] text-slate-300">
-                      Speak freely in Tamil or English! Your words will be instantly transcribed and converted to English.
+                      Speak freely! The AI will automatically detect your language and respond directly.
                     </span>
                   </div>
                 </div>
@@ -433,10 +433,10 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
             {voiceNotice && (
               <div className="p-3 rounded-2xl bg-slate-950 border border-cyan-500/30 text-xs font-mono flex items-center justify-between text-slate-300">
                 <div className="space-y-0.5">
-                  <div className="text-[10px] text-cyan-400 font-bold">🗣️ Live Speech Converted to English:</div>
-                  <div className="text-slate-100 font-medium italic">"{voiceNotice.english}"</div>
+                  <div className="text-[10px] text-cyan-400 font-bold">🗣️ Speech Input Captured:</div>
+                  <div className="text-slate-100 font-medium italic">&quot;{voiceNotice.english}&quot;</div>
                   {voiceNotice.original !== voiceNotice.english && (
-                    <div className="text-[10px] text-slate-500">Original Tamil/Spoken: "{voiceNotice.original}"</div>
+                    <div className="text-[10px] text-slate-500">Original Query: &quot;{voiceNotice.original}&quot;</div>
                   )}
                 </div>
                 <button
@@ -628,7 +628,7 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
                 <div className="text-[11px] font-mono text-slate-300">
                   <div className="text-amber-400 font-bold flex items-center space-x-1">
                     <ImageIcon className="h-3.5 w-3.5" />
-                    <span>போட்டோ இணைக்கப்பட்டுள்ளது (Photo Attached)</span>
+                    <span>Photo Attached</span>
                   </div>
                   <div className="text-[10px] text-slate-400">Will be analyzed by AI Vision Copilot</div>
                 </div>
@@ -657,7 +657,7 @@ export const AiRemediationAssistant: React.FC<AiRemediationAssistantProps> = ({ 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2.5 rounded-xl font-bold transition-all shadow-md shrink-0 flex items-center justify-center bg-amber-500/15 border border-amber-500/50 text-amber-300 hover:bg-amber-500/25 active:scale-95 group"
-                title="போட்டோ பதிவேற்ற (+) / Upload Defect Photo or Screenshot"
+                title="Upload Defect Photo or Screenshot (+)"
               >
                 <Plus className="h-4 w-4 transition-transform group-hover:rotate-90 text-amber-400" />
                 <span className="hidden sm:inline text-xs font-mono ml-1 text-amber-300">Photo</span>
