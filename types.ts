@@ -73,6 +73,7 @@ export interface ImageQualityMetrics {
   preprocessedImageUrl?: string;
   edgeMapImageUrl?: string;
   opencvProcessingTimeMs: number;
+  detectedDefects?: DefectItem[];
 }
 
 export interface ValidationInfo {
