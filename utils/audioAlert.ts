@@ -307,7 +307,7 @@ export function triggerInspectionVoiceAlert(record: {
   
   if (isPass) {
     playNotificationTone();
-    speakVocalAlert("Good One! Quality check passed with zero defects.");
+    speakVocalAlert("Inspection status: PASSED. Component verified acceptable with zero defects.");
   } else {
     const highestSeverity = record.defects?.some(d => (d.severity || '').toLowerCase() === 'critical') ? 'Critical' : 'Major';
     playAlertTone(highestSeverity);
@@ -316,14 +316,10 @@ export function triggerInspectionVoiceAlert(record: {
     const uniqueTypes = Array.from(new Set(defectTypes));
     
     let voiceMessage = "";
-    if (uniqueTypes.some(t => t.toLowerCase().includes('rust'))) {
-      voiceMessage = "Critical Alert! Rusting object detected on component surface.";
-    } else if (uniqueTypes.some(t => t.toLowerCase().includes('bent') || t.toLowerCase().includes('break') || t.toLowerCase().includes('crack') || t.toLowerCase().includes('damage'))) {
-      voiceMessage = "Critical Alert! Bent or broken item detected in assembly structure.";
-    } else if (uniqueTypes.length > 0) {
-      voiceMessage = `Critical Alert! Defect detected: ${uniqueTypes.join(', ')}.`;
+    if (uniqueTypes.length > 0) {
+      voiceMessage = `Defect detected: ${uniqueTypes.join(', ')}. Inspection status: REJECTED.`;
     } else {
-      voiceMessage = "Critical Alert! Manufacturing defect detected.";
+      voiceMessage = "Defect detected on component surface. Inspection status: REJECTED.";
     }
 
     speakVocalAlert(voiceMessage);

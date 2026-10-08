@@ -401,7 +401,16 @@ export const TestingEvaluationPage: React.FC<TestingEvaluationPageProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-mono">
-              {filteredCases.map((tc) => {
+              {filteredCases.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-12 text-center text-slate-500">
+                    <FlaskConical className="h-8 w-8 text-slate-600 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-slate-300">No Benchmark Test Cases Recorded Yet</p>
+                    <p className="text-[11px] text-slate-500 mt-1">Use "+ Record Test Observation" to record benchmark tests or perform live AI inspections.</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredCases.map((tc) => {
                 const isRunning = runningTestId === tc.id;
                 return (
                   <tr key={tc.id} className="hover:bg-slate-800/40 transition-colors">
@@ -519,7 +528,7 @@ export const TestingEvaluationPage: React.FC<TestingEvaluationPageProps> = ({
 
                   </tr>
                 );
-              })}
+              }))}
             </tbody>
           </table>
         </div>

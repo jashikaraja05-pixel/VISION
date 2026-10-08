@@ -118,7 +118,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
   const todayDayName = now.toLocaleDateString('en-US', { weekday: 'long' });
   const currentMonthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
-  // 1. TODAY'S SCANS (இன்றைய தேதி தயாரிப்புகள்)
+  // 1. TODAY'S SCANS
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const todayScans = inspections.filter(i => {
     const t = i.timestamp ? new Date(i.timestamp).getTime() : Date.now();
@@ -127,7 +127,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
   const todayPassed = todayScans.filter(isPassedRecord).length;
   const todayFailed = todayScans.filter(isFailedRecord).length;
 
-  // 2. THIS MONTH'S SCANS (இந்த மாத தயாரிப்புகள்)
+  // 2. THIS MONTH'S SCANS
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth();
   const thisMonthScans = inspections.filter(i => {
@@ -137,7 +137,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
   const thisMonthPassed = thisMonthScans.filter(isPassedRecord).length;
   const thisMonthFailed = thisMonthScans.filter(isFailedRecord).length;
 
-  // 3. THIS WEEK'S SCANS (இந்த வாரம் - கடந்த 7 நாட்கள்)
+  // 3. THIS WEEK'S SCANS (Last 7 Days)
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const weekScans = inspections.filter(i => {
     const d = new Date(i.timestamp || Date.now());
@@ -430,7 +430,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            தேதி, கிழமை, மற்றும் மாதாந்திர அளவிலான நேரடி ஆய்வு வரைபடம் (Date, Day & Month-wise Product Scanning Graphs)
+            Real-Time Date, Day &amp; Month-wise Product Scanning Trends &amp; Inspection Graphs
           </p>
         </div>
 
@@ -461,7 +461,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center space-x-1.5">
               <Calendar className="h-4 w-4" />
-              <span>இன்றைய தேதி (Today)</span>
+              <span>Today</span>
             </span>
             <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded font-bold">
               {todayDateStr}
@@ -485,7 +485,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
               <Clock className="h-4 w-4" />
-              <span>இன்றைய கிழமை (Day)</span>
+              <span>Day of Week</span>
             </span>
             <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded font-bold">
               {todayDayName}
@@ -508,7 +508,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center space-x-1.5">
               <CalendarDays className="h-4 w-4" />
-              <span>இந்த மாதம் (This Month)</span>
+              <span>This Month</span>
             </span>
             <span className="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded font-bold">
               {currentMonthName}
@@ -532,7 +532,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center space-x-1.5">
               <Layers className="h-4 w-4" />
-              <span>மொத்த தயாரிப்புகள் (All Time)</span>
+              <span>All Time Scans</span>
             </span>
             <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold">
               {passRate}% Pass
@@ -630,9 +630,9 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
               <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center space-x-2">
                 <BarChart3 className="h-4 w-4" />
                 <span>
-                  {activeGraphView === 'month' && 'Month-wise Product Scan Volume & Quality Trend (மாதாந்திர வரைபடம்)'}
-                  {activeGraphView === 'day' && 'Day-wise Scans (Last 7 Days) (தினசரி வரைபடம்)'}
-                  {activeGraphView === 'hourly' && 'Hourly Quality Flow - Today (மணிநேர ஓட்டம்)'}
+                  {activeGraphView === 'month' && 'Month-wise Product Scan Volume & Quality Trend'}
+                  {activeGraphView === 'day' && 'Day-wise Scans (Last 7 Days)'}
+                  {activeGraphView === 'hourly' && 'Hourly Quality Flow - Today'}
                 </span>
               </h3>
               <p className="text-[11px] text-slate-400 mt-0.5">
@@ -652,7 +652,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Month-wise (மாதாந்திரம்)
+                Month-wise
               </button>
               <button
                 onClick={() => setActiveGraphView('day')}
@@ -662,7 +662,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Day-wise (தினசரி)
+                Day-wise
               </button>
               <button
                 onClick={() => setActiveGraphView('hourly')}
@@ -672,7 +672,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Hourly (மணிநேரம்)
+                Hourly
               </button>
             </div>
           </div>
@@ -690,7 +690,7 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }} 
                     formatter={(val: any, name: any) => [
                       `${val} Units`,
-                      name === 'passed' ? 'Passed (தேர்ச்சி)' : name === 'failed' ? 'Defective (குறைபாடு)' : 'Total Scans (மொத்தம்)'
+                      name === 'passed' ? 'Passed Units' : name === 'failed' ? 'Defective Units' : 'Total Scans'
                     ]}
                   />
                   <Legend 
@@ -777,13 +777,13 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
 
       </div>
 
-      {/* ================= DATE & DAY AUDIT TABLE (தேதி மற்றும் கிழமை வாரியான அட்டவணை) ================= */}
+      {/* ================= DATE & DAY AUDIT TABLE ================= */}
       <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-6 space-y-4 shadow-xl font-mono">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
           <div>
             <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
-              <span>Products Scanned by Date, Day & Month (தேதி மற்றும் மாத வாரியான தயாரிப்பு பட்டியல்)</span>
+              <span>Products Scanned by Date, Day &amp; Month</span>
             </h3>
             <p className="text-[11px] text-slate-400 mt-0.5">
               Detailed historical audit showing exact volume of products inspected on each calendar date
@@ -808,13 +808,13 @@ export const AnalyticalTrendsPage: React.FC<AnalyticalTrendsPageProps> = ({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-800 text-[11px] text-slate-400 uppercase">
-                <th className="py-2.5 px-3">தேதி (Date)</th>
-                <th className="py-2.5 px-3">கிழமை (Day)</th>
-                <th className="py-2.5 px-3">மாதம் (Month)</th>
-                <th className="py-2.5 px-3 text-right">ஸ்கேன் செய்தவை (Products Scanned)</th>
-                <th className="py-2.5 px-3 text-right">தேர்ச்சி (Passed)</th>
-                <th className="py-2.5 px-3 text-right">குறைபாடுகள் (Defects)</th>
-                <th className="py-2.5 px-3 text-right">தரம் (Compliance Rate)</th>
+                <th className="py-2.5 px-3">Date</th>
+                <th className="py-2.5 px-3">Day</th>
+                <th className="py-2.5 px-3">Month</th>
+                <th className="py-2.5 px-3 text-right">Products Scanned</th>
+                <th className="py-2.5 px-3 text-right">Passed</th>
+                <th className="py-2.5 px-3 text-right">Defects</th>
+                <th className="py-2.5 px-3 text-right">Compliance Rate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">

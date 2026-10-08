@@ -325,7 +325,21 @@ export default function App() {
     };
 
     setInspections(prev => {
-      const updated = [enrichedRecord, ...prev.filter(i => i.id !== enrichedRecord.id)];
+      const targetId = enrichedRecord.replacesInspectionId || enrichedRecord.id;
+      const targetIndex = prev.findIndex(i => i.id === targetId || i.id === enrichedRecord.id);
+
+      let updated: InspectionRecord[];
+      // If re-checking, replace the existing item in-place so total scanned count does NOT increment
+      if (targetIndex !== -1) {
+        updated = [...prev];
+        updated[targetIndex] = enrichedRecord;
+      } else if (enrichedRecord.isRecheck && prev.length > 0) {
+        // Fallback for re-checking the active item: update the head of the list
+        updated = [enrichedRecord, ...prev.slice(1)];
+      } else {
+        updated = [enrichedRecord, ...prev.filter(i => i.id !== enrichedRecord.id)];
+      }
+
       try {
         localStorage.setItem('visioninspect_cached_inspections', JSON.stringify(updated));
       } catch {}

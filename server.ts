@@ -144,109 +144,8 @@ function loadDB(): DBData {
     });
   }
 
-  if (!Array.isArray(db.testCases) || db.testCases.length === 0) {
-    db.testCases = [
-      {
-        id: 'tc-01',
-        testCaseId: 'TC-01',
-        title: 'SMT Circuit Board - Passive Components Thermal Defect',
-        inputType: 'SMT Circuit Board',
-        sampleImageUrl: '/sample_pcb_defect_1785480291504.jpg',
-        imageQualityStatus: 'PASSED',
-        blurScore: 168.4,
-        brightness: 114.2,
-        aiResult: 'FAIL',
-        expectedResult: 'FAIL',
-        observedResult: 'OpenCV Quality: Passed (Sharpness variance: 168.4, Luma: 114.2). Gemini AI identified localized Burn Mark with charred SMD passives near R20/R21.',
-        defectName: 'Burn Mark',
-        defectCategory: 'Thermal Damage',
-        severity: 'Critical',
-        processingTimeMs: 142,
-        verdict: 'PASS',
-        notes: 'Ground truth confirmed: charred scorch marks on R20/R21 resistor cluster.',
-        timestamp: new Date().toLocaleString()
-      },
-      {
-        id: 'tc-02',
-        testCaseId: 'TC-02',
-        title: 'Precision Gear - Assembly Standard Inspection',
-        inputType: 'Precision Gear',
-        sampleImageUrl: '/sample_gear_defect_1785480278517.jpg',
-        imageQualityStatus: 'PASSED',
-        blurScore: 182.1,
-        brightness: 128.6,
-        aiResult: 'PASS',
-        expectedResult: 'PASS',
-        observedResult: 'OpenCV Quality: Passed (Sharpness variance: 182.1). Involute tooth geometry within dimensional tolerance. Surface finish nominal.',
-        defectName: 'None',
-        defectCategory: 'Mechanical Nominal',
-        severity: 'Low',
-        processingTimeMs: 136,
-        verdict: 'PASS',
-        notes: 'Nominal baseline unit meeting ISO 1328 gear accuracy standard.',
-        timestamp: new Date().toLocaleString()
-      },
-      {
-        id: 'tc-03',
-        testCaseId: 'TC-03',
-        title: 'Fastener Hardware - Ferric Oxidation & Rust Pitting',
-        inputType: 'Fastener Hardware',
-        sampleImageUrl: '',
-        imageQualityStatus: 'PASSED',
-        blurScore: 135.0,
-        brightness: 98.4,
-        aiResult: 'FAIL',
-        expectedResult: 'FAIL',
-        observedResult: 'OpenCV Quality: Passed. Gemini AI detected ferric corrosion patina and surface pit degradation exceeding Class 2 standard.',
-        defectName: 'Rust & Corrosion',
-        defectCategory: 'Corrosion',
-        severity: 'Major',
-        processingTimeMs: 129,
-        verdict: 'PASS',
-        notes: 'Atmospheric exposure corrosion test piece.',
-        timestamp: new Date().toLocaleString()
-      },
-      {
-        id: 'tc-04',
-        testCaseId: 'TC-04',
-        title: 'Optical Defocus & Motion Blur Stress Test',
-        inputType: 'Optical Stress Test',
-        sampleImageUrl: '',
-        imageQualityStatus: 'FAILED',
-        blurScore: 24.6,
-        brightness: 102.0,
-        aiResult: 'FAIL',
-        expectedResult: 'FAIL',
-        observedResult: 'OpenCV Quality Gate: Image rejected before AI stage (Laplacian variance 24.6 < 55.0 blur threshold).',
-        defectName: 'Unsuitable Image Quality',
-        defectCategory: 'Quality Gate Rejection',
-        severity: 'Critical',
-        processingTimeMs: 18,
-        verdict: 'PASS',
-        notes: 'Verifies OpenCV prevents poor-quality / blurred imagery from consuming inference compute.',
-        timestamp: new Date().toLocaleString()
-      },
-      {
-        id: 'tc-05',
-        testCaseId: 'TC-05',
-        title: 'Severe Low-Light Underexposure Stress Test',
-        inputType: 'Illumination Stress Test',
-        sampleImageUrl: '',
-        imageQualityStatus: 'FAILED',
-        blurScore: 42.1,
-        brightness: 18.2,
-        aiResult: 'FAIL',
-        expectedResult: 'FAIL',
-        observedResult: 'OpenCV Quality Gate: Image rejected before AI stage (Mean luminance 18.2/255 < 24.0 underexposure threshold).',
-        defectName: 'Severe Underexposure',
-        defectCategory: 'Quality Gate Rejection',
-        severity: 'Critical',
-        processingTimeMs: 16,
-        verdict: 'PASS',
-        notes: 'Verifies low-light rejection gate prompts inspector for ring illumination.',
-        timestamp: new Date().toLocaleString()
-      }
-    ];
+  if (!Array.isArray(db.testCases)) {
+    db.testCases = [];
   }
 
   return db;
@@ -1207,9 +1106,21 @@ async function startServer() {
 
     const db = loadDB();
     if (!Array.isArray(db.inspections)) db.inspections = [];
-    const index = db.inspections.findIndex(i => i.id === newRecord.id);
-    if (index !== -1) {
-      db.inspections[index] = newRecord;
+
+    const targetId = newRecord.replacesInspectionId || newRecord.id;
+    const index = db.inspections.findIndex(i => i.id === targetId || i.id === newRecord.id);
+
+    // If re-checking or updating an existing inspection, replace it in-place
+    if (index !== -1 || newRecord.isRecheck) {
+      if (index !== -1) {
+        db.inspections[index] = newRecord;
+      } else {
+        db.inspections.unshift(newRecord);
+      }
+      // Remove stale/duplicate alerts for this inspection to prevent duplicate count spam
+      if (Array.isArray(db.alerts)) {
+        db.alerts = db.alerts.filter(a => a.inspectionId !== targetId && a.inspectionId !== newRecord.id);
+      }
     } else {
       db.inspections.unshift(newRecord);
     }
@@ -1505,7 +1416,7 @@ JSON Output Schema:
 - overallConfidence: percentage 0-100
 - processingTimeMs: number`;
 
-        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'];
+        const modelsToTry = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.5-pro'];
         for (const modelName of modelsToTry) {
           try {
             const aiPromise = genAI.models.generateContent({

@@ -596,49 +596,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
         {/* Card Container */}
         <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
-          
-          {/* Direct Role Switching: Administrator Portal vs Certified Inspector Portal */}
-          <div className="grid grid-cols-2 gap-2 mb-6 p-1 rounded-xl bg-slate-950/80 border border-slate-800">
-            <button
-              type="button"
-              onClick={() => {
-                setActiveRole('Admin');
-                setRegisterRole('Admin');
-                setErrorMessage(null);
-                setPendingNotice(null);
-                setSuccessNotice(null);
-              }}
-              className={`py-2.5 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center space-x-2 ${
-                activeRole === 'Admin'
-                  ? 'bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.25)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <ShieldCheck className="h-4 w-4 text-purple-400" />
-              <span>Admin Portal</span>
-            </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setActiveRole('Inspector');
-                setRegisterRole('Inspector');
-                setErrorMessage(null);
-                setPendingNotice(null);
-                setSuccessNotice(null);
-              }}
-              className={`py-2.5 px-3 rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center space-x-2 ${
-                activeRole === 'Inspector'
-                  ? 'bg-cyan-500/30 text-cyan-200 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.25)]'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              <UserIcon className="h-4 w-4 text-cyan-400" />
-              <span>Inspector Portal</span>
-            </button>
-          </div>
-
-          {/* Mode Switcher Tabs */}
+          {/* Mode Switcher Tabs (Sign In vs Registration for Selected Role) */}
           <div className="grid grid-cols-2 gap-1 bg-slate-950/80 p-1 rounded-xl border border-slate-800 mb-6">
             <button
               onClick={() => {

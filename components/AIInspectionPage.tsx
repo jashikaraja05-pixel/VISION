@@ -399,30 +399,41 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
         const compLower = (compName || '').toLowerCase();
         const isBoardOrElectronic = compLower.includes('pcb') || compLower.includes('board') || compLower.includes('circuit') || compLower.includes('solder') || compLower.includes('electronic') || compLower.includes('rolls');
 
-        // Sanitize defect coordinates to prevent boxes appearing over left switches
-        const cleanDefects = (d.defects || []).map((def: any) => {
-          if (isBoardOrElectronic && (def.type === 'Burn Mark' || (def.explanation || '').toLowerCase().includes('burn') || (def.explanation || '').toLowerCase().includes('char'))) {
-            if (!def.bbox || def.bbox.x < 48 || def.bbox.width > 35) {
-              return {
-                ...def,
-                bbox: { x: 58, y: 52, width: 14, height: 16, label: 'Charred Burn Region (R20, R21)' },
-              };
-            }
+        // Extract genuine defect coordinates directly from AI model detection
+        const cleanDefects = (d.defects || []).map((def: any, idx: number) => {
+          let bbox = def.bbox;
+          if (!bbox && Array.isArray(def.box_2d) && def.box_2d.length === 4) {
+            const [ymin, xmin, ymax, xmax] = def.box_2d;
+            bbox = {
+              x: Math.round(xmin / 10),
+              y: Math.round(ymin / 10),
+              width: Math.max(8, Math.round((xmax - xmin) / 10)),
+              height: Math.max(8, Math.round((ymax - ymin) / 10)),
+              label: `${def.type || 'Defect'} Region`,
+            };
           }
-          return def;
+          return {
+            ...def,
+            id: def.id || `def-${Date.now()}-${idx}`,
+            bbox: bbox || { x: 45, y: 45, width: 20, height: 20, label: `${def.type || 'Defect'} Region` },
+          };
         });
 
         const primaryDefect = cleanDefects[0];
         const status = d.status || (cleanDefects.length > 0 ? 'FAIL' : 'PASS');
         const decision = d.decision || (status === 'FAIL' ? 'Reject' : 'Acceptable');
 
+        const existingRecord = isRecheck ? (inspectionResult || currentInspection) : null;
+
         record = {
-          id: `insp-${Date.now()}`,
+          id: existingRecord?.id || `insp-${Date.now()}`,
           componentName: compName,
-          componentCode: `COMP-${Math.floor(1000 + Math.random() * 8999)}`,
-          batchNumber: `BATCH-2026-${Math.floor(100 + Math.random() * 899)}`,
-          factoryId: currentUser?.factoryId || 'fac-1',
-          factoryName: currentUser?.factoryName || 'Apex Precision Works',
+          componentCode: existingRecord?.componentCode || `COMP-${Math.floor(1000 + Math.random() * 8999)}`,
+          batchNumber: existingRecord?.batchNumber || `BATCH-2026-${Math.floor(100 + Math.random() * 899)}`,
+          isRecheck: !!isRecheck,
+          replacesInspectionId: existingRecord?.id,
+          factoryId: currentUser?.factoryId || existingRecord?.factoryId || 'fac-1',
+          factoryName: currentUser?.factoryName || existingRecord?.factoryName || 'Apex Precision Works',
           lineId: 'line-1',
           lineName: 'Line Alpha - Heavy Gear Assembly',
           cameraId: 'cam-101',
@@ -751,12 +762,16 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
       ? Math.round(performance.now() - pipelineStartTime)
       : qualityMetrics.opencvProcessingTimeMs + aiInferenceTime;
 
+    const existingRec = isRecheck ? (inspectionResult || currentInspection) : null;
+
     return {
-      id: `insp-${Date.now()}`,
+      id: existingRec?.id || `insp-${Date.now()}`,
       componentName: compName,
-      componentCode: `COMP-${Math.floor(1000 + Math.random() * 8999)}`,
-      batchNumber: `BATCH-2026-${Math.floor(100 + Math.random() * 899)}`,
-      factoryId: currentUser?.factoryId || 'fac-1',
+      componentCode: existingRec?.componentCode || `COMP-${Math.floor(1000 + Math.random() * 8999)}`,
+      batchNumber: existingRec?.batchNumber || `BATCH-2026-${Math.floor(100 + Math.random() * 899)}`,
+      isRecheck: !!isRecheck,
+      replacesInspectionId: existingRec?.id,
+      factoryId: currentUser?.factoryId || existingRec?.factoryId || 'fac-1',
       factoryName: currentUser?.factoryName || 'Apex Precision Works',
       lineId: 'line-1',
       lineName: 'Line Alpha - Heavy Gear Assembly',
@@ -1334,28 +1349,33 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
                                 y={`${bbox.y}%`}
                                 width={`${bbox.width}%`}
                                 height={`${bbox.height}%`}
-                                fill="rgba(239, 68, 68, 0.22)"
+                                fill="rgba(239, 68, 68, 0.25)"
                                 stroke={strokeColor}
-                                strokeWidth="2.5"
-                                strokeDasharray="5 2.5"
-                                className="transition-all duration-150"
+                                strokeWidth="3"
+                                rx="3"
+                                ry="3"
+                                className="transition-all duration-150 shadow-2xl"
                               />
                               {/* Corner targeting reticles for precision alignment */}
-                              <circle cx={`${bbox.x}%`} cy={`${bbox.y}%`} r="3.5" fill={strokeColor} />
-                              <circle cx={`${bbox.x + bbox.width}%`} cy={`${bbox.y}%`} r="3.5" fill={strokeColor} />
-                              <circle cx={`${bbox.x}%`} cy={`${bbox.y + bbox.height}%`} r="3.5" fill={strokeColor} />
-                              <circle cx={`${bbox.x + bbox.width}%`} cy={`${bbox.y + bbox.height}%`} r="3.5" fill={strokeColor} />
+                              <circle cx={`${bbox.x}%`} cy={`${bbox.y}%`} r="4" fill={strokeColor} />
+                              <circle cx={`${bbox.x + bbox.width}%`} cy={`${bbox.y}%`} r="4" fill={strokeColor} />
+                              <circle cx={`${bbox.x}%`} cy={`${bbox.y + bbox.height}%`} r="4" fill={strokeColor} />
+                              <circle cx={`${bbox.x + bbox.width}%`} cy={`${bbox.y + bbox.height}%`} r="4" fill={strokeColor} />
 
-                              <text
-                                x={`${bbox.x}%`}
-                                y={`${Math.max(6, bbox.y - 2)}%`}
-                                fill={strokeColor}
-                                fontSize="11"
-                                fontWeight="bold"
-                                fontFamily="monospace"
-                              >
-                                {def?.type || 'Defect'} ({def?.confidence ?? 96}%)
-                              </text>
+                              {/* Defect Name Tag Badge */}
+                              <g transform={`translate(0, 0)`}>
+                                <text
+                                  x={`${bbox.x}%`}
+                                  y={`${Math.max(5, bbox.y - 2)}%`}
+                                  fill="#fca5a5"
+                                  fontSize="12"
+                                  fontWeight="bold"
+                                  fontFamily="monospace"
+                                  className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+                                >
+                                  🚨 {def?.type || 'Defect'} ({def?.confidence ?? 96}%)
+                                </text>
+                              </g>
                             </g>
                           );
                         })}
@@ -1616,7 +1636,7 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
                   : 'border-rose-500/40 bg-rose-500/10 text-rose-400'
               }`}>
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>QUALITY GATE: {inspectionResult.imageQuality?.status || 'PASSED'}</span>
+                <span>IMAGE CLARITY: {inspectionResult.imageQuality?.status === 'PASSED' ? 'OPTIMAL (READY)' : inspectionResult.imageQuality?.status === 'WARNING' ? 'MARGINAL' : 'REJECTED'}</span>
               </span>
             </div>
 
@@ -1738,9 +1758,9 @@ export const AIInspectionPage: React.FC<AIInspectionPageProps> = ({
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
               <div className="p-3 rounded-xl border border-slate-800 bg-slate-950/80">
-                <span className="text-slate-500 text-[10px] block">Image Quality Status</span>
+                <span className="text-slate-500 text-[10px] block">Image Clarity Status</span>
                 <span className="text-xs font-bold text-emerald-400">
-                  {inspectionResult.validationInfo?.imageQualityStatus || inspectionResult.imageQuality?.status || 'PASSED'}
+                  {inspectionResult.imageQuality?.status === 'FAILED' ? 'Blurry / Unsuitable' : 'Optimal (Sharp)'}
                 </span>
               </div>
 

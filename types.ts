@@ -112,6 +112,8 @@ export interface InspectionRecord {
   defectType?: DefectType;
   workingCondition?: string;
   notes?: string;
+  isRecheck?: boolean;
+  replacesInspectionId?: string;
 
   // Features 1, 2, 3: OpenCV & Structured AI Results
   imageQuality?: ImageQualityMetrics;
